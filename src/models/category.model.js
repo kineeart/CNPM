@@ -1,27 +1,21 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database.js";
-import { Store } from "./store.model.js";
 
-export const Category = sequelize.define("category", {
-  id: {
-    type: DataTypes.UUID,
-    primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
-  },
-  storeId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-    references: {
-      model: Store,
-      key: "id",
+export const Category = sequelize.define(
+  "category",
+  {
+    id: {
+      type: DataTypes.STRING, // vì dữ liệu demo dùng 'C1', 'C2', 'C3'
+      primaryKey: true,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-});
-
-// 🔗 Quan hệ
-Store.hasMany(Category, { foreignKey: "storeId", onDelete: "CASCADE" });
-Category.belongsTo(Store, { foreignKey: "storeId" });
+  {
+    tableName: "category",
+    freezeTableName: true,
+    timestamps: false,
+  }
+);

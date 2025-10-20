@@ -1,4 +1,3 @@
-// ✅ menu.controller.js (sửa)
 import { Store } from "../models/store.model.js";
 import { Category } from "../models/category.model.js";
 import { Product } from "../models/product.model.js";
@@ -7,13 +6,11 @@ export const getStoreMenu = async (req, res) => {
   try {
     const { name } = req.params;
 
-    // Tìm cửa hàng theo name
+    // 🔎 Tìm cửa hàng theo tên
     const store = await Store.findOne({ where: { name } });
-    if (!store) {
-      return res.status(404).json({ message: "❌ Cửa hàng không tồn tại" });
-    }
+    if (!store) return res.status(404).json({ message: "❌ Cửa hàng không tồn tại" });
 
-    // Lấy toàn bộ category + product thuộc cửa hàng này
+    // 🔎 Lấy danh mục + sản phẩm thuộc cửa hàng đó
     const categories = await Category.findAll({
       include: [
         {
