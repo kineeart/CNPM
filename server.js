@@ -5,6 +5,7 @@ import userRoutes from "./src/routes/user.route.js";
 import authRoutes from "./src/routes/auth.route.js";
 import menuRoutes from "./src/routes/menu.route.js";
 import productRoutes from "./src/routes/product.route.js";
+import cartRoutes from "./src/routes/cart.route.js";
 
 import "./src/models/associations.js";
 
@@ -16,6 +17,7 @@ app.use("/api/users", userRoutes);
 app.use("/api", authRoutes);
 app.use("/api", menuRoutes); // 👈 thêm dòng này
 app.use("/api", productRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.get("/api/ping", (req, res) => {
   res.json({ message: "pong" });
