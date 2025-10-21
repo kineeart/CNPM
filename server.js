@@ -8,6 +8,7 @@ import productRoutes from "./src/routes/product.route.js";
 import cartRoutes from "./src/routes/cart.route.js";
 import orderRoutes from "./src/routes/order.routes.js";
 import paymentRoutes from "./src/routes/payment.routes.js";
+import statisticsRoutes from "./src/routes/statistics.routes.js";
 
 import "./src/models/associations.js";
 
@@ -22,6 +23,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/statistics", statisticsRoutes);
 
 app.get("/ping", (req, res) => {
   res.json({ message: "🏓 Server vẫn sống!", time: new Date().toISOString() });
