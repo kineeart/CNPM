@@ -18,10 +18,10 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 app.use("/api", authRoutes);
 app.use("/api", menuRoutes); // 👈 thêm dòng này
-app.use("/api", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
+app.use("/api/products", productRoutes);
 
 app.get("/ping", (req, res) => {
   res.json({ message: "🏓 Server vẫn sống!", time: new Date().toISOString() });
