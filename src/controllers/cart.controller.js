@@ -1,66 +1,61 @@
-import { Order } from "../models/order.model.js";
-import { OrderItem } from "../models/orderItem.model.js";
+import { Cart } from "../models/cart.model.js";
+import { CartItem } from "../models/cartItem.model.js";
 import { Product } from "../models/product.model.js";
 
 export const addToCart = async (req, res) => {
   try {
-    const {
-      userId,
-      storeId,
-      productId,
-      quantity,
-      note,
-      deliveryAddress,
-      contactPhone
-    } = req.body;
+    const { userId, productId, quantity } = req.body;
 
-    if (!userId || !storeId || !productId || !quantity) {
-      return res.status(400).json({ message: "Thiếu thông tin bắt buộc" });
+    if (!userId || !productId || !quantity) {
+      return res.status(400).json({ message: "Thiếu thông tin userId, productId hoặc quantity" });
     }
 
-    // 🔹 Kiểm tra sản phẩm
+    // 🔎 Kiểm tra sản phẩm tồn tại
     const product = await Product.findByPk(productId);
-    if (!product) return res.status(404).json({ message: "Sản phẩm không tồn tại" });
-
-    // 🔹 Tìm Order pending của user + store
-    let order = await Order.findOne({ where: { userId, storeId, status: "pending" } });
-
-    // 🔹 Nếu chưa có Order, tạo mới
-    if (!order) {
-      order = await Order.create({
-        userId,
-        storeId,
-        status: "pending",
-        totalPrice: 0,
-        note: note || "",
-        deliveryAddress: deliveryAddress || "",
-        contactPhone: contactPhone || ""
-      });
+    if (!product) {
+      return res.status(404).json({ message: "Không tìm thấy sản phẩm" });
     }
 
-    // 🔹 Kiểm tra OrderItem đã có chưa
-    let item = await OrderItem.findOne({ where: { orderId: order.id, productId } });
+    // 🔎 Tìm giỏ hàng đang có của user (mỗi user 1 giỏ)
+    let cart = await Cart.findOne({ where: { userId } });
+    if (!cart) {
+      cart = await Cart.create({ userId, totalQuantity: 0, totalPrice: 0 });
+    }
 
-    if (item) {
-      item.quantity += quantity;
-      await item.save();
+    // 🔎 Kiểm tra xem sản phẩm đã có trong giỏ chưa
+    let cartItem = await CartItem.findOne({
+      where: { cartId: cart.id, productId }
+    });
+
+    if (cartItem) {
+      // Nếu có rồi thì tăng số lượng
+      cartItem.quantity += quantity;
+      await cartItem.save();
     } else {
-      await OrderItem.create({
-        orderId: order.id,
-        productId,
+      // Nếu chưa có thì thêm mới
+      cartItem = await CartItem.create({
+        cartId: cart.id,
+        productId: product.id,
         productName: product.name,
         productPrice: product.price,
         quantity
       });
     }
 
-    // 🔹 Cập nhật tổng tiền
-    const items = await OrderItem.findAll({ where: { orderId: order.id } });
-    const totalPrice = items.reduce((sum, i) => sum + i.productPrice * i.quantity, 0);
-    order.totalPrice = totalPrice;
-    await order.save();
+    // 🔢 Cập nhật tổng số lượng & tổng giá
+    const allItems = await CartItem.findAll({ where: { cartId: cart.id } });
+    const totalQuantity = allItems.reduce((sum, item) => sum + item.quantity, 0);
+    const totalPrice = allItems.reduce((sum, item) => sum + (item.productPrice * item.quantity), 0);
 
-    res.status(201).json({ message: "🛒 Đã thêm vào giỏ hàng", order, totalPrice });
+    cart.totalQuantity = totalQuantity;
+    cart.totalPrice = totalPrice;
+    await cart.save();
+
+    res.status(201).json({
+      message: "🛒 Đã thêm vào giỏ hàng thành công!",
+      cart,
+      cartItem
+    });
   } catch (error) {
     console.error("🔥 Lỗi khi thêm vào giỏ hàng:", error);
     res.status(500).json({ message: "Lỗi server", error: error.message });
