@@ -5,33 +5,28 @@ import { Product } from "./product.model.js";
 
 export const OrderItem = sequelize.define("orderitem", {
   id: {
-  type: DataTypes.INTEGER,
-    autoIncrement: true, // ✅ Tự tăng
+    type: DataTypes.INTEGER,
     primaryKey: true,
-
+    autoIncrement: true,
   },
   orderId: {
-    type: DataTypes.STRING(50),
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   productId: {
-    type: DataTypes.STRING(50),
+    type: DataTypes.INTEGER,
     allowNull: false,
   },
   productName: DataTypes.STRING,
   productPrice: DataTypes.INTEGER,
-  quantity: {
-    type: DataTypes.INTEGER,
-    defaultValue: 1,
-  },
+  quantity: DataTypes.INTEGER,
 }, {
-  tableName: "orderitem",  // 👈 khớp tên bảng MySQL
-  freezeTableName: true,
+  tableName: "orderitem",
   timestamps: false,
+  freezeTableName: true,
 });
 
-// Quan hệ
-Order.hasMany(OrderItem, { foreignKey: "orderId", onDelete: "CASCADE" });
+Order.hasMany(OrderItem, { foreignKey: "orderId" });
 OrderItem.belongsTo(Order, { foreignKey: "orderId" });
 
 Product.hasMany(OrderItem, { foreignKey: "productId" });
