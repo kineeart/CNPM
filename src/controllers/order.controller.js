@@ -1,49 +1,58 @@
-import { Order } from "../models/order.model.js";
-import { OrderItem } from "../models/orderItem.model.js";
 import { Cart } from "../models/cart.model.js";
 import { CartItem } from "../models/cartItem.model.js";
+import { Order } from "../models/order.model.js";
+import { OrderItem } from "../models/orderItem.model.js";
 
 export const createOrder = async (req, res) => {
   try {
-    const { cartId } = req.body;
-    if (!cartId) return res.status(400).json({ message: "Thiếu cartId" });
+    const { cartId, note, deliveryAddress, contactPhone } = req.body;
 
-    // 🔍 Lấy giỏ hàng
-    const cart = await Cart.findByPk(cartId, { include: [CartItem] });
-    if (!cart) return res.status(404).json({ message: "Không tìm thấy giỏ hàng" });
-    if (cart.CartItems.length === 0) return res.status(400).json({ message: "Giỏ hàng trống" });
+    if (!cartId) {
+      return res.status(400).json({ message: "Thiếu thông tin cartId" });
+    }
 
-    // 🧾 Tạo đơn hàng
+    // 🔎 Tìm giỏ hàng
+    const cart = await Cart.findByPk(cartId);
+    if (!cart) {
+      return res.status(404).json({ message: "Không tìm thấy giỏ hàng" });
+    }
+
+    // 🔎 Lấy tất cả item trong giỏ
+    const items = await CartItem.findAll({ where: { cartId } });
+    if (items.length === 0) {
+      return res.status(400).json({ message: "Giỏ hàng trống, không thể tạo đơn" });
+    }
+
+    // 🧾 Tạo đơn hàng mới
     const order = await Order.create({
       userId: cart.userId,
-      totalQuantity: cart.totalQuantity,
+      storeId: 1, // ví dụ tạm, có thể truyền động từ client
+      status: "pending",
       totalPrice: cart.totalPrice,
-      status: "pending"
+      note: note || "Tạo tự động từ giỏ hàng",
+      deliveryAddress: deliveryAddress || "Chưa cập nhật",
+      contactPhone: contactPhone || "Chưa cập nhật",
     });
 
-    // 🧩 Tạo các item cho đơn hàng
-    const orderItems = await Promise.all(
-      cart.CartItems.map(item =>
-        OrderItem.create({
-          orderId: order.id,
-          productId: item.productId,
-          productName: item.productName,
-          productPrice: item.productPrice,
-          quantity: item.quantity
-        })
-      )
-    );
+    // 🛒 Thêm từng món từ giỏ vào OrderItem
+    for (const item of items) {
+      await OrderItem.create({
+        orderId: order.id,
+        productId: item.productId,
+        productName: item.productName,
+        productPrice: item.productPrice,
+        quantity: item.quantity,
+      });
+    }
 
-    // 🧹 Xóa giỏ hàng sau khi đặt
+    // 🧹 (Tuỳ chọn) Xoá giỏ hàng sau khi đặt
     await CartItem.destroy({ where: { cartId } });
-    cart.totalQuantity = 0;
-    cart.totalPrice = 0;
-    await cart.save();
+    await cart.destroy();
 
     res.status(201).json({
-      message: "✅ Đã tạo đơn hàng thành công!",
-      order,
-      orderItems
+      message: "🧾 Đơn hàng đã được tạo thành công!",
+      orderId: order.id,
+      total: order.totalPrice,
     });
   } catch (error) {
     console.error("🔥 Lỗi khi tạo đơn hàng:", error);

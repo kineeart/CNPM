@@ -6,6 +6,8 @@ import authRoutes from "./src/routes/auth.route.js";
 import menuRoutes from "./src/routes/menu.route.js";
 import productRoutes from "./src/routes/product.route.js";
 import cartRoutes from "./src/routes/cart.route.js";
+import orderRoutes from "./src/routes/order.routes.js";
+import paymentRoutes from "./src/routes/payment.routes.js";
 
 import "./src/models/associations.js";
 
@@ -18,12 +20,13 @@ app.use("/api", authRoutes);
 app.use("/api", menuRoutes); // 👈 thêm dòng này
 app.use("/api", productRoutes);
 app.use("/api/cart", cartRoutes);
+app.use("/api/orders", orderRoutes);
+app.use("/api/payments", paymentRoutes);
 
-app.get("/api/ping", (req, res) => {
-  res.json({ message: "pong" });
+app.get("/ping", (req, res) => {
+  res.json({ message: "🏓 Server vẫn sống!", time: new Date().toISOString() });
 });
 
-console.log("✅ Models synchronized!");
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
