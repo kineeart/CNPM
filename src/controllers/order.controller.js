@@ -59,3 +59,32 @@ export const createOrder = async (req, res) => {
     res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
+export const getOrdersByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const orders = await Order.findAll({
+      where: { userId: id },
+      include: [
+        {
+          model: OrderItem,
+          as: "items",
+          attributes: ["productName", "productPrice", "quantity", "createdAt"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (!orders.length) {
+      return res.status(404).json({ message: "Không có đơn hàng nào" });
+    }
+
+    res.status(200).json({
+      message: "🧾 Danh sách đơn hàng của người dùng",
+      orders,
+    });
+  } catch (error) {
+    console.error("❌ Lỗi getOrdersByUser:", error);
+    res.status(500).json({ message: "Lỗi server", error: error.message });
+  }
+};

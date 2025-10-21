@@ -26,8 +26,9 @@ export const OrderItem = sequelize.define("orderitem", {
   freezeTableName: true,
 });
 
-Order.hasMany(OrderItem, { foreignKey: "orderId" });
-OrderItem.belongsTo(Order, { foreignKey: "orderId" });
+Order.hasMany(OrderItem, { foreignKey: "orderId", as: "items" });
+OrderItem.belongsTo(Order, { foreignKey: "orderId", as: "order" });
+
 
 Product.hasMany(OrderItem, { foreignKey: "productId" });
 OrderItem.belongsTo(Product, { foreignKey: "productId" });
