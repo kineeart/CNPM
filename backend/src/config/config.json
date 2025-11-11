@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "root",
+    "password": "1234567",
+    "database": "fastfood_drone_db",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
