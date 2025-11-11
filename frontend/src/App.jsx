@@ -6,6 +6,7 @@ import Home from "./pages/Home"; // 👈 THÊM DÒNG NÀY
 import StoreDetail from "./pages/StoreDetail"; // 👈 thêm dòng này
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
                 <Route path="/store/:id" element={<StoreDetail />} /> {/* ✅ */}
 <Route path="/product/:id" element={<ProductDetail />} />
 <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
 
       </Routes>
     </Router>

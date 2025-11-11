@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate(); // ✅ phải đặt trước return
 
   // Lấy userId từ localStorage
   const user = JSON.parse(localStorage.getItem("user"));
@@ -26,11 +29,10 @@ const Cart = () => {
     if (userId) fetchCart();
   }, [userId]);
 
-  // Tăng số lượng
   const increaseQty = async (cartItemId) => {
     try {
       await axios.put(`http://localhost:3000/api/cart/update/${cartItemId}`, {
-        quantity: 1, // tăng 1
+        quantity: 1,
         action: "increase",
       });
       fetchCart();
@@ -39,11 +41,10 @@ const Cart = () => {
     }
   };
 
-  // Giảm số lượng
   const decreaseQty = async (cartItemId) => {
     try {
       await axios.put(`http://localhost:3000/api/cart/update/${cartItemId}`, {
-        quantity: 1, // giảm 1
+        quantity: 1,
         action: "decrease",
       });
       fetchCart();
@@ -52,7 +53,6 @@ const Cart = () => {
     }
   };
 
-  // Xóa sản phẩm khỏi giỏ
   const removeItem = async (cartItemId) => {
     try {
       await axios.delete(`http://localhost:3000/api/cart/remove/${cartItemId}`);
@@ -62,13 +62,15 @@ const Cart = () => {
     }
   };
 
+  const goToCheckout = () => {
+    navigate("/checkout"); // ✅ điều hướng sang Checkout
+  };
+
   if (loading) return <p>Đang tải giỏ hàng...</p>;
   if (!cart || !cart.cartitems || cart.cartitems.length === 0)
     return <p>Giỏ hàng trống</p>;
 
   const cartItems = cart.cartitems;
-
-  // Tính tổng
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.quantity * item.product.price,
@@ -87,8 +89,7 @@ const Cart = () => {
               width="80"
               style={{ marginRight: "10px", verticalAlign: "middle" }}
             />
-            <strong>{item.product.name}</strong> —{" "}
-            {item.product.price.toLocaleString()} VNĐ
+            <strong>{item.product.name}</strong> — {item.product.price.toLocaleString()} VNĐ
             <div>
               <button onClick={() => decreaseQty(item.id)}>-</button>
               <span style={{ margin: "0 8px" }}>{item.quantity}</span>
@@ -108,6 +109,14 @@ const Cart = () => {
       </ul>
       <h3>Tổng số lượng: {totalQuantity}</h3>
       <h3>Tổng tiền: {totalPrice.toLocaleString()} VNĐ</h3>
+
+      {/* ✅ Nút thanh toán phải nằm trong JSX */}
+      <button
+        onClick={goToCheckout}
+        style={{ marginTop: "20px", padding: "10px", background: "green", color: "white" }}
+      >
+        Thanh toán
+      </button>
     </div>
   );
 };

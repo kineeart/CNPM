@@ -30,7 +30,11 @@ export const Cart = sequelize.define("cart", {
     type: DataTypes.DATE,
     allowNull: true,
   },
-  
+  totalPrice: {
+  type: DataTypes.INTEGER,
+  defaultValue: 0,
+},
+
 }, {
   tableName: "cart",
   freezeTableName: true,
@@ -42,6 +46,7 @@ User.hasMany(Cart, { foreignKey: "userId" });
 Cart.belongsTo(User, { foreignKey: "userId" });
 
 // Quan hệ Cart → CartItem
+
 Cart.hasMany(CartItem, { foreignKey: "cartId", as: "cartitems", onDelete: "CASCADE" });
 CartItem.belongsTo(Cart, { foreignKey: "cartId" });
 
