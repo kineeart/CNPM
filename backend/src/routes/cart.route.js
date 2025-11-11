@@ -3,10 +3,10 @@ import { getCart, addToCart, updateCartItem, removeCartItem } from "../controlle
 
 const router = express.Router();
 
-// ❌ Bỏ verifyToken, chỉ gọi controller trực tiếp
-router.get("/:userId", getCart);
-router.post("/add", addToCart);
-router.put("/update/:id", updateCartItem);
-router.delete("/remove/:id", removeCartItem);
+// ❌ Không dùng verifyToken
+router.get("/:userId", getCart);        // Lấy giỏ hàng
+router.post("/add", addToCart);         // Thêm sản phẩm
+router.put("/update/:id", updateCartItem); // Cập nhật số lượng
+router.delete("/remove/:id", removeCartItem); // Xóa sản phẩm
 
 export default router;

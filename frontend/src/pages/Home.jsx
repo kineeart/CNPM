@@ -20,7 +20,28 @@ const HomePage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>🏪 Danh sách cửa hàng</h2>
+      {/* Thanh tiêu đề */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h2>🏪 Danh sách cửa hàng</h2>
+
+        {/* 👉 Nút xem giỏ hàng */}
+        <button
+          onClick={() => navigate("/cart")}
+          style={{
+            backgroundColor: "#4CAF50",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            padding: "10px 16px",
+            cursor: "pointer",
+            fontSize: "16px"
+          }}
+        >
+          🛒 Xem giỏ hàng
+        </button>
+      </div>
+
+      {/* Danh sách cửa hàng */}
       {stores.length === 0 ? (
         <p>Đang tải hoặc chưa có cửa hàng...</p>
       ) : (

@@ -1,6 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database.js";
+import { CartItem } from "./cartItem.model.js";
 import { User } from "./user.model.js";
+import { Product } from "./product.model.js";
 
 export const Cart = sequelize.define("cart", {
   id: {
@@ -28,12 +30,22 @@ export const Cart = sequelize.define("cart", {
     type: DataTypes.DATE,
     allowNull: true,
   },
+  
 }, {
   tableName: "cart",
   freezeTableName: true,
   timestamps: false,
 });
 
-// 🔗 Quan hệ
+// Quan hệ User → Cart
 User.hasMany(Cart, { foreignKey: "userId" });
 Cart.belongsTo(User, { foreignKey: "userId" });
+
+// Quan hệ Cart → CartItem
+Cart.hasMany(CartItem, { foreignKey: "cartId", as: "cartitems", onDelete: "CASCADE" });
+CartItem.belongsTo(Cart, { foreignKey: "cartId" });
+
+// Quan hệ Product → CartItem
+Product.hasMany(CartItem, { foreignKey: "productId" });
+CartItem.belongsTo(Product, { foreignKey: "productId" });
+

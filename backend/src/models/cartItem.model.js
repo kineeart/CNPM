@@ -29,15 +29,12 @@ export const CartItem = sequelize.define("cartitem", {
     type: DataTypes.INTEGER,
     defaultValue: 1,
   },
-  totalItemPrice: {
-    type: DataTypes.VIRTUAL,
-    get() {
-      return this.quantity * this.productPrice;
-    },
-    set(value) {
-      throw new Error("Không thể set giá trị totalItemPrice trực tiếp");
-    }
-  },
+totalItemPrice: {
+  type: DataTypes.INTEGER,
+  defaultValue: 0,
+},
+
+
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW,
@@ -49,8 +46,6 @@ export const CartItem = sequelize.define("cartitem", {
 });
 
 // 🔗 Quan hệ
-Cart.hasMany(CartItem, { foreignKey: "cartId", onDelete: "CASCADE" });
-CartItem.belongsTo(Cart, { foreignKey: "cartId" });
-
 Product.hasMany(CartItem, { foreignKey: "productId" });
 CartItem.belongsTo(Product, { foreignKey: "productId" });
+
