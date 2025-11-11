@@ -16,7 +16,7 @@ function App() {
         <Route path="/home" element={<Home />} /> {/* 👈 Trang sau đăng nhập */}
                 <Route path="/store/:id" element={<StoreDetail />} /> {/* ✅ */}
 <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/cart" element={<Cart />} />
+<Route path="/cart" element={<Cart />} />
 
       </Routes>
     </Router>

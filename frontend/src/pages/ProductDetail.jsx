@@ -18,27 +18,29 @@ const ProductDetail = () => {
     fetchProduct();
   }, [id]);
 
-  const handleAddToCart = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        alert("❌ Bạn cần đăng nhập trước!");
-        return;
-      }
+const handleAddToCart = async () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?.id;
 
-      const res = await axios.post(
-        "http://localhost:3000/api/cart/add",
-        { productId: product.id, quantity: 1 }, // chỉ gửi productId và quantity
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  if (!userId) {
+    alert("Bạn cần đăng nhập trước khi thêm sản phẩm vào giỏ hàng!");
+    return;
+  }
 
-      console.log("✅ Thêm vào giỏ hàng thành công:", res.data);
-      alert("✅ Đã thêm vào giỏ hàng!");
-    } catch (err) {
-      console.error("❌ Lỗi khi thêm giỏ hàng:", err.response?.data || err.message);
-      alert(`❌ Lỗi khi thêm giỏ hàng: ${err.response?.data?.message || err.message}`);
-    }
-  };
+  try {
+    const res = await axios.post("http://localhost:3000/api/cart/add", {
+      userId,
+      productId: product.id,
+      quantity: 1,
+    });
+
+    console.log(`✅ Đã thêm sản phẩm vào giỏ của userId = ${userId}`);
+    console.log(res.data);
+  } catch (err) {
+    console.error("❌ Lỗi khi thêm giỏ hàng:", err.response?.data || err.message);
+  }
+};
+
 
   if (!product) return <p>Đang tải sản phẩm...</p>;
 

@@ -1,13 +1,10 @@
-// middleware/auth.js
-import jwt from "jsonwebtoken";
-
-export const authenticate = async (req, res, next) => {
+export const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
+  console.log(">>> Auth Header:", authHeader); // debug
   if (!authHeader) return res.status(401).json({ message: "Không có token" });
 
   const token = authHeader.split(" ")[1];
-  console.log("Auth Header:", authHeader);  // debug
-  console.log("Token nhận được:", token);   // debug
+  console.log(">>> Token (backend nhận):", token); // debug
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || "JWT_SECRET");
