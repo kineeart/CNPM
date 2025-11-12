@@ -1,16 +1,16 @@
-🛒 FastFood Drone Delivery System
+FastFood Drone Delivery System
 
-Website đặt đồ ăn nhanh và giao hàng bằng drone 🚀 — xây dựng bằng React + Node.js + MySQL
+Website đặt đồ ăn nhanh và giao hàng bằng drone  — xây dựng bằng React + Node.js + MySQL
 
-📖 Giới thiệu
+Giới thiệu
 
 Dự án là một hệ thống đặt món ăn trực tuyến, nơi người dùng có thể:
 
-Xem danh sách cửa hàng và menu món ăn 🍔
+Xem danh sách cửa hàng và menu món ăn 
 
-Thêm món vào giỏ hàng 🛍️
+Thêm món vào giỏ hàng ️
 
-Tạo đơn hàng và theo dõi trạng thái giao hàng bằng drone 🚁
+Tạo đơn hàng và theo dõi trạng thái giao hàng bằng drone 
 
 Quản lý người dùng, cửa hàng và sản phẩm (phía admin)
 
@@ -20,8 +20,8 @@ Frontend: React (hiển thị giao diện người dùng)
 
 Backend: Node.js + Express + MySQL (xử lý API và dữ liệu)
 
-⚙️ Công nghệ sử dụng
-🧩 Frontend:
+Công nghệ sử dụng
+Frontend:
 
 React.js (Vite)
 
@@ -31,7 +31,7 @@ Axios
 
 TailwindCSS (hoặc CSS thuần)
 
-🧠 Backend:
+Backend:
 
 Node.js + Express.js
 
@@ -43,27 +43,9 @@ JWT (xác thực người dùng)
 
 Bcrypt (mã hóa mật khẩu)
 
-🗂️ Cấu trúc thư mục
-Source code/
-├── backend/
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── config/
-│   │   └── server.js
-│   └── package.json
-│
-├── frontend-react/
-│   ├── src/
-│   │   ├── pages/
-│   │   ├── components/
-│   │   └── App.jsx
-│   └── package.json
-│
-└── README.md
 
-🧰 Cài đặt và chạy dự án
+
+Cài đặt và chạy dự án
 1️⃣ Cài đặt cơ sở dữ liệu
 
 Tạo database trong MySQL, ví dụ: fastfood_db
