@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "../css/HomePage.css";
+import Navbar from "../components/Navbar";  // 👈 THÊM
 
-const HomePage = () => {
+const Home = () => {
+  
   const [stores, setStores] = useState([]);
   const navigate = useNavigate();
 
@@ -18,47 +21,47 @@ const HomePage = () => {
     fetchStores();
   }, []);
 
-  return (
-    <div style={{ padding: "20px" }}>
-      {/* Thanh tiêu đề */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+return (
+  <>
+    <Navbar />  {/* Navbar xuất hiện ở mọi trang bạn đặt */}
+    <div className="homepage-container">
+      {/* HEADER */}
+      <div className="header">
         <h2>🏪 Danh sách cửa hàng</h2>
-
-        {/* 👉 Nút xem giỏ hàng */}
-        <button
-          onClick={() => navigate("/cart")}
-          style={{
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            borderRadius: "8px",
-            padding: "10px 16px",
-            cursor: "pointer",
-            fontSize: "16px"
-          }}
-        >
+        <button className="cart-btn" onClick={() => navigate("/cart")}>
           🛒 Xem giỏ hàng
         </button>
       </div>
 
-      {/* Danh sách cửa hàng */}
+      {/* STORE GRID */}
       {stores.length === 0 ? (
-        <p>Đang tải hoặc chưa có cửa hàng...</p>
+        <p className="loading-text">Đang tải hoặc chưa có cửa hàng...</p>
       ) : (
-        <ul>
+        <div className="store-list">
           {stores.map((store) => (
-            <li
+            <div
               key={store.id}
-              style={{ cursor: "pointer", color: "blue" }}
+              className="store-card"
               onClick={() => navigate(`/store/${store.id}`)}
             >
-              <strong>{store.name}</strong> — {store.address}
-            </li>
+              <div
+                className="store-image"
+                style={{ backgroundImage: `url(${store.avatar})` }}
+              ></div>
+
+              <div className="store-info">
+                <h3>{store.name}</h3>
+                <p>{store.address}</p>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
-  );
+  </>
+);
+
+  
 };
 
-export default HomePage;
+export default Home;

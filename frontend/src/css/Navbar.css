@@ -1,0 +1,67 @@
+/* navbar chung dùng cho mọi trang */
+/* Navbar toàn màn hình */
+.navbar {
+  width: 100vw; /* full chiều ngang viewport */
+  height: 60px;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between; /* logo trái, nút phải */
+  align-items: center;
+  background-color: #764ba2;
+  color: white;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  box-sizing: border-box;
+}
+
+
+/* Logo */
+.navbar .logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Nút */
+.navbar .nav-actions button {
+  margin-left: 15px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background-color: #667eea;
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.navbar .nav-actions button:hover {
+  background-color: #5a67d8;
+  transform: scale(1.05);
+}
+
+
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+.nav-links {
+  display: flex;
+  gap: 15px;
+}
+
+.nav-btn {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 15px;
+}
+
+.nav-btn:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
