@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import "../css/Checkout.css";
+import Navbar from "../components/Navbar";  // 👈 THÊM
+
 import axios from "axios";
 
 const Checkout = () => {
@@ -57,71 +60,62 @@ const Checkout = () => {
   };
 
   return (
-    <div className="checkout-container">
-      <h2 style={{ textAlign: "center" }}>🛒 Thanh toán</h2>
-      <div className="checkout-content">
-        {/* Cột trái: giỏ hàng */}
-        <div className="checkout-left">
-          {cartItems.length === 0 ? (
-            <p>Giỏ hàng trống</p>
-          ) : (
-            <div className="cart-items">
-              {cartItems.map((item) => (
-                <div key={item.id} className="cart-item">
-                  <img
-                    src={item.productImage}
-                    alt={item.productName}
-                    className="cart-item-image"
-                  />
-                  <div className="cart-item-info">
-                    <p>{item.productName}</p>
-                    <p>Số lượng: {item.quantity}</p>
-                    <p>Tổng: {(item.quantity * item.productPrice).toLocaleString()} VNĐ</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="cart-summary">
-            <p>Tổng số lượng: <strong>{cartItems.reduce((s, i) => s + i.quantity, 0)}</strong></p>
-            <p>Tổng tiền: <strong>{cartTotal.toLocaleString()} VNĐ</strong></p>
-          </div>
-        </div>
-
-        {/* Cột phải: form */}
-        <div className="checkout-right">
-          <div className="form-group">
-            <label>
-              Ghi chú:
-              <input type="text" name="note" value={form.note} onChange={handleChange} />
-            </label>
-          </div>
-          <div className="form-group">
-            <label>
-              Địa chỉ giao hàng:
-              <input type="text" name="deliveryAddress" value={form.deliveryAddress} onChange={handleChange} />
-            </label>
-          </div>
-          <div className="form-group">
-            <label>
-              Số điện thoại:
-              <input type="text" name="contactPhone" value={form.contactPhone} onChange={handleChange} />
-            </label>
-          </div>
-
-          <button
-            className="checkout-btn"
-            onClick={handleCheckout}
-            disabled={loading || cartItems.length === 0 || !userId}
-          >
-            {loading ? "Đang xử lý..." : "Thanh toán & Tạo đơn"}
-          </button>
-
-          {message && <p style={{ marginTop: "10px" }}>{message}</p>}
-        </div>
+    <>
+    <Navbar />  {/* Navbar xuất hiện ở mọi trang bạn đặt */}
+   <div className="checkout-container">
+  <h2>🛒 Thanh toán</h2>
+  <div className="checkout-content">
+    {/* Cột trái: danh sách sản phẩm */}
+   <div className="checkout-left">
+  {cartItems.length === 0 ? (
+    <p>Giỏ hàng trống</p>
+  ) : (
+    <div className="cart-items">
+      <div className="cart-header">
+        <span>Tên</span>
+        <span>SL</span>
+        <span>Tổng</span>
       </div>
+
+      {cartItems.map((item) => (
+        <div key={item.id} className="cart-row">
+          <span className="item-name">{item.productName}</span>
+          <span>{item.quantity}</span>
+          <span>{(item.quantity * item.productPrice).toLocaleString()} VNĐ</span>
+        </div>
+      ))}
     </div>
+  )}
+</div>
+
+
+    {/* Cột phải: tổng số lượng và tổng tiền */}
+    <div className="checkout-right">
+  <div className="cart-summary1">
+    <h3>Tổng giỏ hàng</h3>
+    <p>
+      Tổng số lượng: <strong>{cartItems.reduce((s, i) => s + i.quantity, 0)}</strong>
+    </p>
+    <p>
+      Tổng tiền: <strong>{cartTotal.toLocaleString()} VNĐ</strong>
+    </p>
+  </div>
+
+  <button
+    onClick={handleCheckout}
+    disabled={loading || cartItems.length === 0 || !userId}
+    className="checkout-btn-green"
+  >
+    {loading ? "Đang xử lý..." : "Thanh toán & Tạo đơn"}
+  </button>
+</div>
+
+  </div>
+</div>
+
+ </>
   );
+  
 };
 
 export default Checkout;

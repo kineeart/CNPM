@@ -1,0 +1,98 @@
+.checkout-container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: #fdfdfd;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.p{
+    color: black;
+}
+
+.checkout-content {
+  display: flex;
+  gap: 30px; /* khoảng cách giữa 2 div */
+  padding: 10px;
+  flex-wrap: wrap; /* responsive, khi màn hình hẹp sẽ xếp dọc */
+}
+
+.checkout-left, .checkout-right {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #f9f9f9;
+}
+
+.checkout-left {
+  flex: 2 1 450px; /* chiếm nhiều hơn */
+  min-width: 300px;
+}
+
+.checkout-right {
+  flex: 1 1 250px; /* chiếm còn lại */
+  min-width: 200px;
+}
+
+/* Cart items */
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cart-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+.cart-item-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.cart-item-info1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; 
+  width: 100%;
+}
+
+.cart-item-info1 p {
+        color: black;
+
+  margin: 0;
+  padding: 0 10px;    /* tạo khoảng cách giữa các mục */
+  white-space: nowrap; /* tránh bị xuống dòng */
+}
+
+.item-name {
+    
+  font-weight: bold;
+  max-width: 160px;        /* tránh tên quá dài phá layout */
+  overflow: hidden;
+  text-overflow: ellipsis; /* ... nếu quá dài */
+  white-space: nowrap;
+}
+
+.item-name {
+    color: black;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* cắt chữ dài */
+}
+
+/* Cart summary */
+.cart-summary1 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: bold;
+  color: black;
+}

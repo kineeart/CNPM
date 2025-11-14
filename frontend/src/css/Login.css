@@ -1,0 +1,72 @@
+/* Nền full màn hình */
+.login-background {
+  height: 100vh;
+  width: 100vw;
+  background-image: url("https://t4.ftcdn.net/jpg/02/92/20/37/360_F_292203735_CSsyqyS6A4Z9Czd4Msf7qZEhoxjpzZl1.jpg");
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Form đăng nhập */
+.login-form {
+  width: 350px;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  /* Nền mờ */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.login-form h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: white;
+}
+
+.login-form input {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+}
+
+.login-form button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #28a745; /* xanh lá */
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.login-form button:hover {
+  background-color: #1e7e34;
+}
+
+.register-link {
+  margin-top: 15px;
+  text-align: center;
+  color: #fff;
+  font-size: 14px;
+}
+
+.register-link span {
+  color: #ffcc00;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.register-link span:hover {
+  text-decoration: underline;
+}

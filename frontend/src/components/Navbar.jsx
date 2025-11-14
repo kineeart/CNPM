@@ -5,7 +5,6 @@ import "../css/Navbar.css";
 const Navbar = () => {
   const navigate = useNavigate();
 
-  // Lấy userId từ localStorage
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
 
@@ -14,11 +13,14 @@ const Navbar = () => {
       alert("Bạn cần đăng nhập để xem giỏ hàng!");
       return;
     }
-    navigate(`/cart`); // Hoặc `/cart/${userId}` nếu backend yêu cầu
+    navigate(`/cart`);
   };
 
   const goToAccount = () => {
-    navigate("/account"); // Trang quản lý tài khoản
+   
+      navigate("/Login.jsx");   // Chưa đăng nhập → về login
+ 
+   
   };
 
   return (
