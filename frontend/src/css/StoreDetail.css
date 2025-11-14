@@ -1,0 +1,103 @@
+.store-detail-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.store-header {
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* GRID 3 CỘT */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 3 cột cố định */
+  gap: 20px;
+}
+
+/* CARD SẢN PHẨM */
+.product-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 360px; /* 🔹 Card dài hơn */
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* ẢNH */
+.product-image {
+  width: 90%;            /* 90% chiều ngang card */
+  height: 180px;         /* chiều cao */
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.3s ease;
+
+  display: block;        /* để margin auto hoạt động */
+  margin: 0 auto;        /* căn giữa ngang */
+  border-radius: 8px;    /* tùy chọn, đẹp hơn */
+}
+
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Info */
+.product-info {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.product-info h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.product-info p {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+.product-info strong {
+  font-size: 16px;
+  color: #f43c55;
+}
+
+.product-info button {
+  padding: 10px 15px;
+  background: #4caf50;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.product-info button:hover {
+  background: #43a047;
+  transform: scale(1.05);
+}
+
+/* Loading */
+.loading-text {
+  text-align: center;
+  color: #777;
+  font-style: italic;
+  margin-top: 40px;
+}
