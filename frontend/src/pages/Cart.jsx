@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import "../css/Cart.css"; // CSS riêng
+import Navbar from "../components/Navbar";  // 👈 THÊM
 
 const Cart = () => {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const navigate = useNavigate(); // ✅ phải đặt trước return
+  const navigate = useNavigate();
 
-  // Lấy userId từ localStorage
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
 
-  // Gọi API lấy cart theo userId
   const fetchCart = async () => {
     try {
       const res = await axios.get(`http://localhost:3000/api/cart/${userId}`);
       setCart(res.data);
     } catch (err) {
       console.error("❌ Lỗi khi tải giỏ hàng:", err);
-      setCart({ cartitems: [] }); // fallback nếu lỗi
+      setCart({ cartitems: [] });
     } finally {
       setLoading(false);
     }
@@ -37,7 +37,7 @@ const Cart = () => {
       });
       fetchCart();
     } catch (err) {
-      console.error("❌ Lỗi khi tăng số lượng:", err);
+      console.error(err);
     }
   };
 
@@ -49,7 +49,7 @@ const Cart = () => {
       });
       fetchCart();
     } catch (err) {
-      console.error("❌ Lỗi khi giảm số lượng:", err);
+      console.error(err);
     }
   };
 
@@ -58,13 +58,11 @@ const Cart = () => {
       await axios.delete(`http://localhost:3000/api/cart/remove/${cartItemId}`);
       fetchCart();
     } catch (err) {
-      console.error("❌ Lỗi khi xóa sản phẩm:", err);
+      console.error(err);
     }
   };
 
-  const goToCheckout = () => {
-    navigate("/checkout"); // ✅ điều hướng sang Checkout
-  };
+  const goToCheckout = () => navigate("/checkout");
 
   if (loading) return <p>Đang tải giỏ hàng...</p>;
   if (!cart || !cart.cartitems || cart.cartitems.length === 0)
@@ -78,46 +76,58 @@ const Cart = () => {
   );
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>🛒 Giỏ hàng của bạn</h2>
-      <ul>
-        {cartItems.map((item) => (
-          <li key={item.id} style={{ marginBottom: "20px" }}>
-            <img
-              src={item.product.imageUrl}
-              alt={item.product.name}
-              width="80"
-              style={{ marginRight: "10px", verticalAlign: "middle" }}
-            />
-            <strong>{item.product.name}</strong> — {item.product.price.toLocaleString()} VNĐ
-            <div>
+     <>
+    <Navbar />  {/* Navbar xuất hiện ở mọi trang bạn đặt */}
+    <div className="cart-container">
+  <div className="cart-items-wrapper">
+    <div className="cart-items">
+      {cartItems.map((item) => (
+        <div key={item.id} className="cart-item">
+          <img
+            src={item.product.imageUrl}
+            alt={item.product.name}
+            className="cart-item-image"
+          />
+          <div className="cart-item-info">
+            <span className="cart-item-name">{item.product.name}</span>
+            <span className="cart-item-price">{item.product.price.toLocaleString()} VNĐ</span>
+            <div className="cart-item-controls">
               <button onClick={() => decreaseQty(item.id)}>-</button>
-              <span style={{ margin: "0 8px" }}>{item.quantity}</span>
+              <span>{item.quantity}</span>
               <button onClick={() => increaseQty(item.id)}>+</button>
-              <button
-                onClick={() => removeItem(item.id)}
-                style={{ marginLeft: "10px", color: "red" }}
-              >
+              <span className="cart-item-total">
+                {(item.quantity * item.product.price).toLocaleString()} VNĐ
+              </span>
+              <button onClick={() => removeItem(item.id)} className="remove-btn">
                 Xóa
               </button>
             </div>
-            <p>
-              Thành tiền: {(item.quantity * item.product.price).toLocaleString()} VNĐ
-            </p>
-          </li>
-        ))}
-      </ul>
-      <h3>Tổng số lượng: {totalQuantity}</h3>
-      <h3>Tổng tiền: {totalPrice.toLocaleString()} VNĐ</h3>
-
-      {/* ✅ Nút thanh toán phải nằm trong JSX */}
-      <button
-        onClick={goToCheckout}
-        style={{ marginTop: "20px", padding: "10px", background: "green", color: "white" }}
-      >
-        Thanh toán
-      </button>
+          </div>
+        </div>
+      ))}
     </div>
+  </div>
+
+<div className="cart-summary">
+  <h2>Tổng giỏ hàng</h2>
+
+  <div className="summary-container">
+    {/* Bên trái: tổng số lượng và tổng tiền */}
+    <div className="summary-details">
+      <p>Tổng số lượng: <strong>{totalQuantity}</strong></p>
+      <p>Tổng tiền: <strong>{totalPrice.toLocaleString()} VNĐ</strong></p>
+    </div>
+
+    {/* Bên phải: nút thanh toán */}
+    <div className="summary-actions">
+      <button className="checkout-btn" onClick={goToCheckout}>Thanh toán</button>
+    </div>
+  </div>
+</div>
+
+
+</div>
+</>
   );
 };
 
