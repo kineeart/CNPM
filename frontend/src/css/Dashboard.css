@@ -1,0 +1,91 @@
+/* Container chính */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: #f5f6fa;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #2c3e50;
+  color: #fff;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sidebar h2 {
+  margin-bottom: 30px;
+  font-size: 24px;
+  letter-spacing: 1px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+}
+
+.sidebar ul li {
+  margin: 15px 0;
+  padding: 10px 12px;
+  width: 100%;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.sidebar ul li:hover {
+  background: #34495e;
+}
+
+/* Nội dung chính */
+.dashboard-content {
+  flex: 1;
+  padding: 30px;
+}
+
+.dashboard-content h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+/* Các card thống kê */
+.stats {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1 1 200px;
+  padding: 25px 20px;
+  background: linear-gradient(145deg, #ffffff, #dfe6e9);
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+  cursor: default;
+}
+
+.stat-card h3 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  color: #2d3436;
+}
+
+.stat-card p {
+  font-size: 28px;
+  font-weight: bold;
+  color: #0984e3;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 22px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(145deg, #dfe6e9, #ffffff);
+}

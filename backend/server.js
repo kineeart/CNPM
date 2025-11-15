@@ -10,6 +10,7 @@ import orderRoutes from "./src/routes/order.routes.js";
 import paymentRoutes from "./src/routes/payment.routes.js";
 import statisticsRoutes from "./src/routes/statistics.routes.js";
 import storeRoutes from "./src/routes/store.route.js";
+import dashboardRouter from "./src/routes/dashboard.route.js";
 
 import "./src/models/associations.js";
 
@@ -22,6 +23,7 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ Đăng ký routes
+  
 app.use("/api/users", userRoutes);
 app.use("/api", authRoutes);
 app.use("/api", menuRoutes);
@@ -31,6 +33,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/statistics", statisticsRoutes);
 app.use("/api/stores", storeRoutes);
+app.use("/api/dashboard", dashboardRouter);
 
 // ✅ Test server
 app.get("/ping", (req, res) => {

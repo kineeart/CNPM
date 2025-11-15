@@ -64,9 +64,24 @@ const Cart = () => {
 
   const goToCheckout = () => navigate("/checkout");
 
-  if (loading) return <p>Đang tải giỏ hàng...</p>;
-  if (!cart || !cart.cartitems || cart.cartitems.length === 0)
-    return <p>Giỏ hàng trống</p>;
+ if (loading) return <p>Đang tải giỏ hàng...</p>;
+
+if (!cart || !cart.cartitems || cart.cartitems.length === 0) {
+  return (
+    <>
+      <Navbar />
+      <div className="empty-cart-container">
+        <div className="empty-cart-box">
+          <h2>Giỏ hàng trống</h2>
+          <button onClick={() => navigate("/home")} className="back-home-btn">
+            Quay về trang chủ
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 
   const cartItems = cart.cartitems;
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);

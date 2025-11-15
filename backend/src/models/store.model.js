@@ -51,7 +51,7 @@ export const Store = sequelize.define(
     },
   },
   {
-    tableName: "Store",
+    tableName: "store",
     timestamps: true,
   }
 );

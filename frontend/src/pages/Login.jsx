@@ -9,30 +9,36 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post("http://localhost:3000/api/users/login", {
-        email,
-        password,
-      });
+  e.preventDefault();
+  try {
+    const res = await axios.post("http://localhost:3000/api/users/login", {
+      email,
+      password,
+    });
 
-      const token = res.data.token;
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      const userId = payload?.id;
-      const userEmail = payload?.email;
-      const userRole = payload?.role;
+    const token = res.data.token;
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    const userId = payload?.id;
+    const userEmail = payload?.email;
+    const userRole = payload?.role;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ id: userId, email: userEmail, role: userRole })
-      );
+    localStorage.setItem("token", token);
+    localStorage.setItem(
+      "user",
+      JSON.stringify({ id: userId, email: userEmail, role: userRole })
+    );
 
-      navigate("/home");
-    } catch (err) {
-      console.error("❌ Đăng nhập thất bại:", err.response?.data || err.message);
+    // ✅ Kiểm tra nếu là admin
+    if (userEmail === "admin@gmail.com" && password === "admin123") {
+      navigate("/Dashboard"); // chuyển sang Dashboard
+    } else {
+      navigate("/home"); // các user khác
     }
-  };
+  } catch (err) {
+    console.error("❌ Đăng nhập thất bại:", err.response?.data || err.message);
+  }
+};
+
 
   return (
     <div className="login-background">
