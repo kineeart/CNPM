@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
 import Orders from "./pages/Orders";
 import Products from "./pages/Products";
+import Store from "./pages/Store";
 
 function App() {
   return (
@@ -36,6 +37,8 @@ function App() {
         <Route path="/customers" element={<Customers />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/products" element={<Products />} />
+                <Route path="/stores" element={<Store />} />
+
       </Routes>
     </Router>
   );
