@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Sidebar from "./Sidebar"; // import Sidebar
 
 const API_URL = "http://localhost:3000/api/users";
 // ⚠️ đổi lại đúng port backend của bạn
@@ -84,6 +85,9 @@ const res = await axios.get("http://localhost:3000/api/users");
   };
 
   return (
+        <div style={{ display: "flex", minHeight: "100vh" }}>
+      <Sidebar />
+
     <div style={{ padding: "20px" }}>
       <h2>👤 Người dùng</h2>
 
@@ -198,6 +202,7 @@ const res = await axios.get("http://localhost:3000/api/users");
         </tbody>
       </table>
     </div>
+      </div>
   );
 };
 

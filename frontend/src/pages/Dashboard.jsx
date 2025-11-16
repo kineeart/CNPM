@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../css/Dashboard.css";
+import Sidebar from "./Sidebar"; // import Sidebar
+
 import { useNavigate } from "react-router-dom";
 
 const cardStyle = {
@@ -42,17 +44,8 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container" style={{ display: "flex", minHeight: "100vh" }}>
       {/* Sidebar trái */}
-      <div className="sidebar" style={{ width: "200px", background: "#2c3e50", color: "#fff", padding: "20px" }}>
-        <h2>Dashboard</h2>
-        <ul style={{ listStyle: "none", padding: 0 }}>
-<li onClick={() => navigate("/customers")} style={{ margin: "15px 0", cursor: "pointer" }}>
-  Người dùng
-</li>
-          <li style={{ margin: "15px 0", cursor: "pointer" }}>Đơn hàng</li>
-          <li style={{ margin: "15px 0", cursor: "pointer" }}>Sản phẩm</li>
-          <li style={{ margin: "15px 0", cursor: "pointer" }}>Nhà hàng</li>
-        </ul>
-      </div>
+      <Sidebar />
+
 
       {/* Nội dung bên phải */}
       <div className="dashboard-content" style={{ flex: 1, padding: "20px" }}>

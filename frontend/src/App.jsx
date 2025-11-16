@@ -9,6 +9,7 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
+import Orders from "./pages/Orders";   // nếu file tên Orders.jsx
 
 function App() {
   return (
@@ -23,6 +24,8 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/dashboard" element={<Dashboard />} />
 <Route path="/customers" element={<Customers />} />
+
+  <Route path="/orders" element={<Orders />} />
 
       </Routes>
     </Router>

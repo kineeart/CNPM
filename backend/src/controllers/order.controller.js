@@ -80,3 +80,35 @@ export const getOrdersByUser = async (req, res) => {
     res.status(500).json({ message: "Lỗi server", error: error.message });
   }
 };
+
+
+export const getOrders = async (req, res) => {
+  try {
+    const orders = await Order.findAll();
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+export const updateOrderStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const order = await Order.findByPk(id);
+    if (!order) {
+      return res.status(404).json({ message: "Order không tồn tại" });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.json({ message: "Cập nhật thành công", order });
+  } catch (err) {
+    console.error("❌ Lỗi update:", err);
+    res.status(500).json({ error: "Lỗi server" });
+  }
+};
+
