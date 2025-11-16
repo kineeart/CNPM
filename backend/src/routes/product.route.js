@@ -11,11 +11,13 @@ import {
 
 const router = express.Router();
 
+router.get("/store/:storeId", getProductsByStoreId); // đặt trước
 router.get("/", getProducts);
 router.get("/:id", getProductById);
 router.post("/", createProduct);
 router.put("/:id", updateProduct);
 router.delete("/:id", deleteProduct);
+
 // Lấy tất cả sản phẩm của 1 cửa hàng
 router.get("/store/:storeId", getProductsByStoreId);
 

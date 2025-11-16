@@ -1,13 +1,13 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database.js";
 import { Store } from "./store.model.js";
-import { Category } from "./category.model.js";
 
+// product.model.js
 export const Product = sequelize.define(
   "product",
   {
     id: {
-      type: DataTypes.STRING, // dữ liệu demo dùng 'P1', 'P2'...
+      type: DataTypes.STRING,
       primaryKey: true,
     },
     storeId: {
@@ -15,12 +15,6 @@ export const Product = sequelize.define(
       allowNull: false,
       references: { model: Store, key: "id" },
     },
-    categoryId: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      references: { model: Category, key: "id" },
-    },
-    sku: DataTypes.STRING,
     name: DataTypes.STRING,
     price: DataTypes.INTEGER,
     description: DataTypes.STRING,
@@ -37,9 +31,12 @@ export const Product = sequelize.define(
   }
 );
 
-// 🔗 Quan hệ
-Store.hasMany(Product, { foreignKey: "storeId", onDelete: "CASCADE" });
-Product.belongsTo(Store, { foreignKey: "storeId" });
 
-Category.hasMany(Product, { foreignKey: "categoryId", onDelete: "CASCADE" });
-Product.belongsTo(Category, { foreignKey: "categoryId" });
+
+// 🔗 Quan hệ
+Store.hasMany(Product, { foreignKey: "storeId", as: "products" });
+Product.belongsTo(Store, { foreignKey: "storeId", as: "store" });
+
+
+
+
