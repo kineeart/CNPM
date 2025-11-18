@@ -1,0 +1,102 @@
+/* src/css/CustomerOrder.css */
+
+/* CustomerOrder.css */
+.order-page-wrapper {
+  min-height: 100vh; /* full chiều cao viewport */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* căn giữa theo ngang */
+  justify-content: flex-start; /* nội dung top-down, có thể dùng center nếu muốn căn giữa dọc */
+  padding: 20px;
+  background-color: #f8f9fa;
+}
+
+.order-container {
+  width: 100%;
+  max-width: 1000px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+
+h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.no-orders-message {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+  font-size: 16px;
+}
+
+.order-table {
+    color: rgb(0, 0, 0);
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.order-table th,
+.order-table td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.order-table th {
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+}
+
+.order-table tbody tr {
+  border-bottom: 1px solid #ddd;
+  transition: background-color 0.2s;
+}
+
+.order-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.detail-btn {
+  background-color: #28a745;
+  border: none;
+  color: rgb(0, 0, 0);
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+}
+
+.detail-btn:hover {
+  background-color: #218838;
+}
+
+/* Status icon + text */
+.status-icon {
+  margin-right: 5px;
+}
+
+.error-message {
+  color: #dc3545;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .order-table th,
+  .order-table td {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+}

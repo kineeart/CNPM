@@ -27,10 +27,8 @@ return (
     <div className="homepage-container">
       {/* HEADER */}
       <div className="header">
-        <h2>🏪 Danh sách cửa hàng</h2>
-        <button className="cart-btn" onClick={() => navigate("/cart")}>
-          🛒 Xem giỏ hàng
-        </button>
+        <h2>Danh sách cửa hàng</h2>
+      
       </div>
 
       {/* STORE GRID */}
