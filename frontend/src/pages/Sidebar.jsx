@@ -23,7 +23,7 @@ const Sidebar = () => {
         padding: "20px",
       }}
     >
-      <h2>Dashboard</h2>
+<h2 style={{ color: "#fff" }}>Dashboard</h2>
       <ul style={{ listStyle: "none", padding: 0 }}>
         {menuItems.map((item) => (
           <li
