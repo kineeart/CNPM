@@ -103,7 +103,7 @@ const Products = () => {
       <Sidebar />
 
       <div style={{ flex: 1, padding: "20px" }}>
-        <h2>📦 Danh sách sản phẩm</h2>
+        <h2>Danh sách sản phẩm</h2>
 
         <button
           onClick={handleAdd}
