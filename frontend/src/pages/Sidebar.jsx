@@ -11,6 +11,11 @@ const Sidebar = () => {
     { label: "Đơn hàng", path: "/orders" },
     { label: "Sản phẩm", path: "/products" },
     { label: "Nhà hàng", path: "/stores" },
+    { label: "Drone", path: "/drone" },
+
+    { label: "Trang chủ", path: "/home" },
+    
+
   ];
 
   return (

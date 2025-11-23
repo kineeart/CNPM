@@ -4,6 +4,7 @@
   padding: 20px;
   box-sizing: border-box;
   font-family: "Segoe UI", Tahoma, sans-serif;
+  background-color: #f9f9f9; /* Nền tổng thể */
 }
 
 .store-header {
@@ -21,12 +22,14 @@
 
 /* CARD SẢN PHẨM */
 .product-card {
-  background: white;
+  background: #fff;
+  border: 1px solid #000;       /* 🔹 Viền đen */
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  min-height: 360px; /* 🔹 Card dài hơn */
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
 }
 
 .product-card:hover {

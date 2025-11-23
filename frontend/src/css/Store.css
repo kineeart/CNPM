@@ -1,0 +1,85 @@
+/* Store.css */
+
+/* Container chính */
+.store-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9f9f9;
+}
+
+/* Nội dung bên phải */
+.store-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+  color: #333;
+}
+
+/* Tiêu đề */
+.store-content h1 {
+  margin-bottom: 20px;
+  font-size: 28px;
+  color: #222;
+}
+
+/* Bảng */
+.store-content table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.store-content th,
+.store-content td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.store-content th {
+  background-color: #f2f2f2;
+  color: #333;
+}
+
+/* Hover row */
+.store-content tbody tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Hình ảnh */
+.store-content img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+/* Button */
+.admin-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.3s;
+  font-size: 14px;
+}
+
+/* Button xóa */
+.btn-delete {
+  background-color: #dc3545;
+}
+
+.btn-delete:hover {
+  background-color: #c82333;
+}
+
+/* Button thêm/sửa nếu cần */
+.btn-add {
+  background-color: #007bff;
+  margin-bottom: 15px;
+}
+
+.btn-add:hover {
+  background-color: #0069d9;
+}

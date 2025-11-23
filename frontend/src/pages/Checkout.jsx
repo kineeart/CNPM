@@ -38,26 +38,36 @@ const Checkout = () => {
   };
 
   const handleCheckout = async () => {
-    if (!userId || cartItems.length === 0) return;
-    setLoading(true);
-    setMessage("");
-    try {
-      const res = await axios.post("http://localhost:3000/api/orders", {
-        userId,
-        note: form.note,
-        deliveryAddress: form.deliveryAddress,
-        contactPhone: form.contactPhone,
-        cartId: cartItems[0].cartId,
-      });
-      setMessage(`✅ Đơn hàng #${res.data.orderId} đã tạo thành công! Tổng: ${res.data.total}`);
-      setCartItems([]);
-      setCartTotal(0);
-    } catch (err) {
-      console.error("❌ Lỗi khi tạo đơn hàng:", err);
-      setMessage("❌ Lỗi khi tạo đơn hàng, thử lại sau.");
+  if (!userId || cartItems.length === 0) return;
+  setLoading(true);
+  setMessage("");
+
+  try {
+    const res = await axios.post("http://localhost:3000/api/zalopay/create", {
+      userId,
+      totalAmount: cartTotal,
+      items: cartItems.map(i => ({
+        itemid: i.productId,
+        itemname: i.productName,
+        itemprice: i.productPrice,
+        itemquantity: i.quantity,
+      }))
+    });
+
+    if (res.data.returncode === 1 && res.data.orderurl) {
+      // redirect user sang ZaloPay
+      window.location.href = res.data.orderurl;
+    } else {
+      setMessage("❌ Tạo đơn ZaloPay thất bại: " + res.data.returnmessage);
     }
-    setLoading(false);
-  };
+  } catch (err) {
+    console.error("❌ Lỗi khi tạo đơn ZaloPay:", err);
+    setMessage("❌ Lỗi khi tạo đơn ZaloPay, thử lại sau.");
+  }
+
+  setLoading(false);
+};
+
 
   return (
     <>
@@ -106,7 +116,7 @@ const Checkout = () => {
     disabled={loading || cartItems.length === 0 || !userId}
     className="checkout-btn-green"
   >
-    {loading ? "Đang xử lý..." : "Thanh toán & Tạo đơn"}
+    {loading ? "Đang xử lý..." : "Thanh toán"}
   </button>
 </div>
 

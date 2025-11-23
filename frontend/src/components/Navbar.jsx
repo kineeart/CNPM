@@ -13,6 +13,7 @@ const Navbar = () => {
   const goToCart = () => {
     if (!userId) {
       alert("Bạn cần đăng nhập để xem giỏ hàng!");
+      navigate("/"); // chưa login → về trang Login
       return;
     }
     navigate("/cart");
@@ -20,7 +21,7 @@ const Navbar = () => {
 
   const toggleAccountMenu = () => {
     if (!userId) {
-      navigate("/login");
+      navigate("/"); // chưa login → về trang Login
     } else {
       setIsDropdownOpen(!isDropdownOpen);
     }
@@ -39,7 +40,7 @@ const Navbar = () => {
   const handleLogout = () => {
     localStorage.removeItem("user");
     setIsDropdownOpen(false);
-    navigate("/login");
+    navigate("/"); // logout → về trang Login
     window.location.reload();
   };
 
@@ -59,7 +60,6 @@ const Navbar = () => {
 
           {isDropdownOpen && userId && (
             <div className="dropdown-menu">
-              <button onClick={goToProfile}>👀 Xem hồ sơ</button>
               <button onClick={goToOrders}>📦 Đơn hàng</button>
               <button onClick={handleLogout}>🚪 Đăng xuất</button>
             </div>

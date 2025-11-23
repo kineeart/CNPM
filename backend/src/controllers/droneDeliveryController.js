@@ -1,105 +1,79 @@
 // src/controllers/droneDeliveryController.js
 import DroneDelivery from "../models/DroneDelivery.js";
 
-// Lấy danh sách
-const getAll = async (req, res) => {
+// Lấy danh sách tất cả drone
+export const getAll = async (req, res) => {
   try {
-    const data = await DroneDelivery.findAll();
-    res.json({ message: "Danh sách Drone Delivery", data });
+    const drones = await DroneDelivery.findAll({
+      attributes: ["id", "orderId", "name", "speed", "status", "estimatedTime", "location", "createdAt", "updatedAt"]
+    });
+    res.json({ message: "Danh sách Drone Delivery", data: drones });
   } catch (err) {
+    console.error("❌ Lỗi getAll:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// Tạo mới
-const create = async (req, res) => {
+// Lấy drone theo ID
+export const getById = async (req, res) => {
   try {
-    const newRecord = await DroneDelivery.create(req.body);
-    res.json({ message: "Tạo mới thành công", data: newRecord });
+    const drone = await DroneDelivery.findByPk(req.params.id);
+    if (!drone) return res.status(404).json({ error: "Drone không tồn tại" });
+    res.json(drone);
   } catch (err) {
+    console.error("❌ Lỗi getById:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// Lấy theo ID
-const getById = async (req, res) => {
+// Tạo mới drone
+export const create = async (req, res) => {
   try {
-    const rec = await DroneDelivery.findByPk(req.params.id);
-    res.json(rec);
+    const { name, speed } = req.body;
+    if (!name) return res.status(400).json({ error: "Tên drone bắt buộc" });
+
+    const newDrone = await DroneDelivery.create({
+      name,
+      speed: speed || 0,
+      orderId: null,
+      status: "WAITING",
+      estimatedTime: null,
+      location: null
+    });
+
+    res.json({ message: "Tạo mới thành công", data: newDrone });
   } catch (err) {
+    console.error("❌ Lỗi create:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// Cập nhật
-const update = async (req, res) => {
+// Cập nhật drone
+export const update = async (req, res) => {
   try {
-    await DroneDelivery.update(req.body, { where: { id: req.params.id } });
+    const [updatedRows] = await DroneDelivery.update(req.body, { where: { id: req.params.id } });
+    if (updatedRows === 0) return res.status(404).json({ error: "Drone không tồn tại" });
     res.json({ message: "Cập nhật thành công" });
   } catch (err) {
+    console.error("❌ Lỗi update:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// Xóa
-const remove = async (req, res) => {
+// Xóa drone
+export const remove = async (req, res) => {
   try {
+    const drone = await DroneDelivery.findByPk(req.params.id);
+    if (!drone) return res.status(404).json({ error: "Drone không tồn tại" });
+
+    if (["FLYING", "RETURNING", "DELIVERED"].includes(drone.status)) {
+      return res.status(400).json({ error: `Không thể xóa drone đang ${drone.status}` });
+    }
+
     await DroneDelivery.destroy({ where: { id: req.params.id } });
     res.json({ message: "Xóa thành công" });
   } catch (err) {
+    console.error("❌ Lỗi remove:", err);
     res.status(500).json({ error: err.message });
   }
 };
-
-// 👉 Export dạng default để import không lỗi
-export default {
-  getAll,
-  create,
-  getById,
-  update,
-  remove,
-};
-export const getWaitingDrones = async (req, res) => {
-  try {
-    const drones = await DroneDelivery.findAll({
-      where: { status: "WAITING" }
-    });
-    res.json(drones);
-  } catch (err) {
-    console.error("❌ Lỗi lấy drone:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
-export const assignDrone = async (req, res) => {
-  try {
-    const { orderId, droneId, estimatedTime, location } = req.body;
-
-    if (!orderId || !droneId) {
-      return res.status(400).json({ error: "orderId và droneId bắt buộc" });
-    }
-
-    // Update drone có droneId và status = WAITING
-    const [updatedRows] = await DroneDelivery.update(
-      {
-        orderId,
-        status: "FLYING",
-        estimatedTime: estimatedTime || null,
-        location: location || null,
-      },
-      {
-        where: { droneId, status: "WAITING" },
-      }
-    );
-
-    if (updatedRows === 0) {
-      return res.status(404).json({ error: "Drone không tồn tại hoặc không còn WAITING" });
-    }
-
-    res.json({ message: "✅ Drone đã được gán cho đơn hàng!" });
-  } catch (err) {
-    console.error("❌ Lỗi assign drone:", err);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-

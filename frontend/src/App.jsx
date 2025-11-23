@@ -11,7 +11,7 @@ import StoreDetail from "./pages/StoreDetail";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
-import CustomerOrder from "./pages/CustomerOrder"; // ⭐ Thêm dòng này
+import CustomerOrder from "./pages/CustomerOrder";
 
 // ==== ADMIN PAGES ====
 import Dashboard from "./pages/Dashboard";
@@ -19,6 +19,9 @@ import Customers from "./pages/Customers";
 import Orders from "./pages/Orders";
 import Products from "./pages/Products";
 import Store from "./pages/Store";
+
+// ⭐ Thêm trang quản lý drone
+import Drone from "./pages/Drone";   // <--- THÊM DÒNG NÀY
 
 function App() {
   return (
@@ -36,7 +39,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
 
-        {/* ⭐ Thêm trang xem đơn hàng của khách */}
+        {/* ⭐ Đơn hàng của khách */}
         <Route path="/my-orders" element={<CustomerOrder />} />
 
         {/* ==== ADMIN ==== */}
@@ -45,6 +48,10 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/products" element={<Products />} />
         <Route path="/stores" element={<Store />} />
+
+        {/* ⭐ THÊM ROUTE DRONE */}
+        <Route path="/drone" element={<Drone />} />   {/* <--- ROUTE MỚI */}
+
       </Routes>
     </Router>
   );

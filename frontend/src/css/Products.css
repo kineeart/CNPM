@@ -1,0 +1,131 @@
+.products-page {
+  flex: 1;
+  padding: 25px;
+  background: #fff;
+  color: #000;
+  min-height: 100vh;
+}
+
+/* ===== Nút thêm sản phẩm ===== */
+.add-btn {
+  margin-bottom: 20px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background: #0056b3;
+}
+
+/* ===== Table ===== */
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background: #fff;
+}
+
+.products-table th {
+  padding: 12px;
+  background: #f1f1f1;
+  border-bottom: 2px solid #ddd;
+  text-align: left;
+}
+
+.products-table td {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.products-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.products-table img {
+  width: 55px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+/* ===== Popup thêm/chỉnh sửa ===== */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.popup-form {
+  background: #fff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.popup-form h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #007bff;
+  font-size: 20px;
+}
+
+/* ===== Form Fields ===== */
+.popup-form label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.popup-form input,
+.popup-form select,
+.popup-form textarea {
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.popup-form textarea {
+  resize: vertical;
+}
+
+/* ===== Form Buttons ===== */
+.popup-form button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+  margin-right: 8px;
+}
+
+.popup-form button[type="submit"] {
+  background: #28a745;
+  color: white;
+}
+
+.popup-form button[type="button"] {
+  background: #dc3545;
+  color: white;
+}
+
+.popup-form button:hover {
+  opacity: 0.9;
+}
