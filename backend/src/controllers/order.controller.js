@@ -8,19 +8,21 @@ export const createOrder = async (req, res) => {
   try {
     const { userId, cartId, note, deliveryAddress, contactPhone } = req.body;
 
-    if (!cartId || !userId) {
-      return res.status(400).json({ message: "Thiếu thông tin cartId hoặc userId" });
+    if (!userId || !cartId) {
+      return res.status(400).json({ message: "Thiếu thông tin userId hoặc cartId" });
     }
 
+    // Lấy giỏ hàng
     const cart = await Cart.findOne({ where: { id: cartId, userId } });
     if (!cart) return res.status(404).json({ message: "Không tìm thấy giỏ hàng" });
 
     const items = await CartItem.findAll({ where: { cartId } });
     if (!items.length) return res.status(400).json({ message: "Giỏ hàng trống" });
 
+    // Tạo order
     const order = await Order.create({
-      userId,            // ✅ dùng userId từ frontend
-      storeId: 1,
+      userId,
+      storeId: 1, // nếu cần storeId tạm
       status: "pending",
       totalPrice: cart.totalPrice,
       note: note || "",
@@ -28,6 +30,7 @@ export const createOrder = async (req, res) => {
       contactPhone: contactPhone || "",
     });
 
+    // Tạo order items dựa trên cart items
     for (const item of items) {
       await OrderItem.create({
         orderId: order.id,
@@ -38,7 +41,7 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Xoá giỏ hàng sau khi tạo order
+    // Xóa giỏ hàng sau khi tạo order
     await CartItem.destroy({ where: { cartId } });
     await cart.destroy();
 
@@ -48,6 +51,8 @@ export const createOrder = async (req, res) => {
     res.status(500).json({ message: "Lỗi server" });
   }
 };
+
+
 
 
 // 📜 Lấy danh sách đơn hàng của user
