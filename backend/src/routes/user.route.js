@@ -1,29 +1,26 @@
 import express from "express";
-import {
-  registerUser,
-  loginUser,
-  getUsers,
-  updateUser,
-  deleteUser,
-} from "../controllers/user.controller.js";
-
 const router = express.Router();
 
-// Đăng ký
-router.post("/register", registerUser);
-
-// Đăng nhập
-router.post("/login", loginUser);
+import {
+  getUsers,
+  registerUser,      // dùng registerUser cho frontend tạo user
+  updateUser,
+  adminCreateUser,deleteUser,    // dùng adminCreateUser cho admin tạo user
+} from "../controllers/user.controller.js";
 
 // Lấy danh sách user
 router.get("/", getUsers);
 
+// Tạo user từ frontend
+router.post("/", registerUser);
+
+// Tạo user từ admin
+router.post("/admin", adminCreateUser);
+
 // Cập nhật user
 router.put("/:id", updateUser);
 
-// Xóa user
 router.delete("/:id", deleteUser);
 
-router.post("/", registerUser);   // 👈 Thêm dòng này
 
 export default router;

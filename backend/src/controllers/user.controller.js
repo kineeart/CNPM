@@ -131,4 +131,50 @@ export const deleteUser = async (req, res) => {
 };
 
 
+export const adminCreateUser = async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      phone,
+      password,
+      role,
+      status,
+      address,
+      ward,
+      district,
+      province
+    } = req.body;
+
+    const existing = await User.findOne({ where: { email } });
+    if (existing)
+      return res.status(400).json({ message: "Email đã tồn tại" });
+
+    // 1️⃣ Tạo user
+    const user = await User.create({
+      name,
+      email,
+      phone,
+      password: password || "123456", // mặc định nếu không nhập
+      role: role || "CUSTOMER",
+      status: status || "ACTIVE",
+    });
+
+    // 2️⃣ Tạo address mặc định
+    await Address.create({
+      userId: user.id,
+      name,
+      phone,
+      address: address || "",
+      ward: ward || "",
+      district: district || "",
+      province: province || "",
+      isDefault: true,
+    });
+
+    res.json({ message: "Tạo user thành công", user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 

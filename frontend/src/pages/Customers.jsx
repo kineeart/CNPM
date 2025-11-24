@@ -10,12 +10,20 @@ const Customers = () => {
   const [showForm, setShowForm] = useState(false);
   const [editUser, setEditUser] = useState(null);
 
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     name: "",
     email: "",
     phone: "",
+    password: "",
+    role: "CUSTOMER",
     status: "ACTIVE",
-  });
+    address: "",
+    ward: "",
+    district: "",
+    province: ""
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
 
   const fetchUsers = async () => {
     try {
@@ -31,26 +39,38 @@ const Customers = () => {
   }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
     try {
       if (editUser) {
-        await axios.put(`${API_URL}/${editUser.id}`, formData);
+        // Chỉ gửi những field có thể update
+        const updateData = {
+          name: formData.name,
+          phone: formData.phone,
+          role: formData.role,
+          status: formData.status,
+        };
+        await axios.put(`${API_URL}/${editUser.id}`, updateData);
       } else {
-        await axios.post(API_URL, formData);
+        // Tạo user từ admin
+        await axios.post(`${API_URL}/admin`, formData);
       }
+
       setShowForm(false);
       setEditUser(null);
+      setFormData(initialFormData);
       fetchUsers();
     } catch (err) {
       console.error("Lỗi:", err);
+      alert("Có lỗi xảy ra. Kiểm tra console để biết chi tiết.");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("❗ Bạn có chắc chắn muốn xóa người dùng này?")) return;
+    if (!window.confirm("❗ Bạn có chắc chắn muốn xóa người dùng này?")) return;
     try {
       await axios.delete(`${API_URL}/${id}`);
       fetchUsers();
@@ -62,24 +82,29 @@ const Customers = () => {
   const openEdit = (u) => {
     setEditUser(u);
     setFormData({
-      name: u.name,
-      email: u.email,
-      phone: u.phone,
-      status: u.status,
+      name: u.name || "",
+      email: u.email || "",
+      phone: u.phone || "",
+      password: "", // không hiển thị mật khẩu cũ
+      role: u.role || "CUSTOMER",
+      status: u.status || "ACTIVE",
+      address: u.address || "",
+      ward: u.ward || "",
+      district: u.district || "",
+      province: u.province || ""
     });
     setShowForm(true);
   };
 
   const openAdd = () => {
     setEditUser(null);
-    setFormData({ name: "", email: "", phone: "", status: "ACTIVE" });
+    setFormData(initialFormData);
     setShowForm(true);
   };
 
   return (
     <div className="customers-container">
       <Sidebar />
-
       <div className="customers-content">
         <div className="header">
           <h2>Danh sách người dùng</h2>
@@ -91,29 +116,23 @@ const Customers = () => {
           <div className="form-box">
             <h3>{editUser ? "Chỉnh sửa người dùng" : "Thêm người dùng"}</h3>
 
-            <input
-              type="text"
-              name="name"
-              placeholder="Tên"
-              value={formData.name}
-              onChange={handleChange}
-            />
+            <input type="text" name="name" placeholder="Tên" value={formData.name} onChange={handleChange} />
+            <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />
+            <input type="text" name="phone" placeholder="Số điện thoại" value={formData.phone} onChange={handleChange} />
+            {!editUser && (
+              <input type="password" name="password" placeholder="Mật khẩu" value={formData.password} onChange={handleChange} />
+            )}
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-            />
+            <input type="text" name="address" placeholder="Địa chỉ" value={formData.address} onChange={handleChange} />
+            <input type="text" name="ward" placeholder="Phường/Xã" value={formData.ward} onChange={handleChange} />
+            <input type="text" name="district" placeholder="Quận/Huyện" value={formData.district} onChange={handleChange} />
+            <input type="text" name="province" placeholder="Tỉnh/Thành phố" value={formData.province} onChange={handleChange} />
 
-            <input
-              type="text"
-              name="phone"
-              placeholder="Số điện thoại"
-              value={formData.phone}
-              onChange={handleChange}
-            />
+            <select name="role" value={formData.role} onChange={handleChange}>
+              <option value="CUSTOMER">CUSTOMER</option>
+              <option value="STORE_ADMIN">STORE_ADMIN</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
 
             <select name="status" value={formData.status} onChange={handleChange}>
               <option value="ACTIVE">Đang hoạt động</option>
@@ -133,11 +152,11 @@ const Customers = () => {
                 <th>Tên</th>
                 <th>Email</th>
                 <th>Số điện thoại</th>
+                <th>Role</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
               </tr>
             </thead>
-
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
@@ -145,8 +164,9 @@ const Customers = () => {
                   <td>{u.name}</td>
                   <td>{u.email}</td>
                   <td>{u.phone}</td>
+                  <td>{u.role}</td>
                   <td>
-                    <span className={u.status === "ACTIVE" ? "active" : "INACTIVE"}>
+                    <span className={u.status === "ACTIVE" ? "active" : "inactive"}>
                       {u.status}
                     </span>
                   </td>
