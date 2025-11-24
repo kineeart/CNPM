@@ -13,12 +13,19 @@ const DroneDelivery = sequelize.define(
 
     orderId: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
+    // ⭐ Thêm tên drone
+    name: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
 
-    droneId: {
+    // ⭐ Thêm tốc độ drone (m/s hoặc km/h tùy bạn dùng)
+    speed: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
 
     status: {
@@ -37,8 +44,8 @@ const DroneDelivery = sequelize.define(
     },
   },
   {
-    tableName: "dronedelivery", // ép dùng đúng tên bảng
-    timestamps: true, // nếu bảng bạn không có createdAt & updatedAt
+    tableName: "dronedelivery",
+    timestamps: true,
   }
 );
 

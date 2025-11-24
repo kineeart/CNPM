@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import "../css/Drone.css";
 import Sidebar from "./Sidebar";
 
 const API_URL = "http://localhost:3000/api/drone-delivery";
@@ -67,76 +68,59 @@ const fetchDrones = async () => {
   };
 
   return (
-    <div className="dashboard-container" style={{ display: "flex", minHeight: "100vh" }}>
-      <Sidebar />
-      <div style={{ padding: 20 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 15 }}>
-          <h2>Quản lý Drone Delivery</h2>
-          <button onClick={openAdd}>➕ Thêm Drone</button>
-        </div>
-
-        <table border="1" cellPadding="8" style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th>STT</th>
-              <th>Tên</th>
-              <th>Tốc độ</th>
-              <th>Status</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {drones.length > 0 ? (
-              drones.map((d, idx) => (
-                <tr key={d.id}>
-                  <td>{idx + 1}</td>
-                  <td>{d.name}</td>
-                  <td>{d.speed}</td>
-                  <td>{d.status}</td>
-                  <td>
-                    <button onClick={() => handleDelete(d.id)}>Xoá</button>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="5" style={{ textAlign: "center", padding: 20 }}>Không có dữ liệu</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-
-        {showModal && (
-          <div style={{
-            position: "fixed",
-            inset: 0,
-            background: "#0005",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }}>
-            <div style={{ background: "#fff", padding: 20, borderRadius: 10, width: 300 }}>
-              <h3>Thêm Drone</h3>
-              <form onSubmit={handleSubmit} style={{ display: "grid", gap: 10 }}>
-                <label>
-                  Tên drone:
-                  <input name="name" value={form.name} onChange={handleChange} required />
-                </label>
-
-                <label>
-                  Tốc độ (km/h):
-                  <input type="number" name="speed" value={form.speed} onChange={handleChange} />
-                </label>
-
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <button type="button" onClick={() => setShowModal(false)}>Đóng</button>
-                  <button type="submit">Tạo mới</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-      </div>
+    <div className="dashboard-container">
+  <Sidebar />
+  <div className="drone-content">
+    <div className="drone-header">
+      <h2>Quản lý Drone Delivery</h2>
+      <button className="add-btn" onClick={openAdd}>➕ Thêm Drone</button>
     </div>
+
+    <table className="drone-table">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Tên</th>
+          <th>Tốc độ</th>
+          <th>Status</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        {drones.map((d, idx) => (
+          <tr key={d.id}>
+            <td>{idx + 1}</td>
+            <td>{d.name}</td>
+            <td>{d.speed}</td>
+            <td>{d.status}</td>
+            <td>
+              <button className="delete-btn" onClick={() => handleDelete(d.id)}>Xoá</button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    {showModal && (
+      <div className="modal-overlay">
+        <div className="modal-box">
+          <h3>Thêm Drone</h3>
+
+          <label>Tên Drone</label>
+          <input name="name" value={form.name} onChange={handleChange} />
+
+          <label>Tốc độ (km/h)</label>
+          <input type="number" name="speed" value={form.speed} onChange={handleChange} />
+
+          <div className="modal-actions">
+            <button className="close-btn" onClick={() => setShowModal(false)}>Đóng</button>
+            <button className="submit-btn" onClick={handleSubmit}>Tạo mới</button>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+</div>
+
   );
 }

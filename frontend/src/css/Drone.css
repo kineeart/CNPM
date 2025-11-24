@@ -1,0 +1,161 @@
+/* ===== Layout chung ===== */
+.dashboard-container {
+  background: #ffffff;
+  color: #000000;
+  min-height: 100vh;
+  display: flex;
+  padding: 20px;
+}
+
+/* Nội dung phải */
+.drone-content {
+  flex: 1;
+  padding: 20px;
+  color: #000;
+}
+
+/* ===== Tiêu đề ===== */
+.drone-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.drone-header h2 {
+  color: #000;
+  margin: 0;
+}
+
+/* ===== Nút thêm ===== */
+.add-btn {
+  padding: 10px 14px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.add-btn:hover {
+  background: #0069d9;
+  transform: scale(1.05);
+}
+
+/* ===== Bảng ===== */
+.drone-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+}
+
+.drone-table th {
+  padding: 12px;
+  background: #f0f0f0;
+  color: #000;
+  text-align: left;
+}
+
+.drone-table td {
+  padding: 12px;
+  color: #000;
+  border: 1px solid #000;
+}
+
+.drone-table tr:hover {
+  background: #efefef;
+}
+
+/* ===== Nút xoá ===== */
+.delete-btn {
+  padding: 6px 12px;
+  background: #e74c3c;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.delete-btn:hover {
+  background: #c0392b;
+  transform: scale(1.05);
+}
+
+/* ===== Modal overlay ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== Modal box ===== */
+.modal-box {
+    font-weight: bolder;
+  background: #4d6485;
+  padding: 20px;
+  width: 340px;
+  border-radius: 10px;
+  color: #000;
+  border: 1px solid #000;
+}
+
+.modal-box h3 {
+  margin-top: 0;
+  color: #007bff;
+}
+
+.modal-box label {
+  font-size: 14px;
+  color: #333;
+}
+
+.modal-box input {
+  width: 100%;
+  background: #5a638d;
+  padding: 10px;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  margin-top: 5px;
+}
+
+/* ===== Modal actions ===== */
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+/* Nút đóng */
+.close-btn {
+  padding: 8px 12px;
+  background: #888;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #777;
+}
+
+/* Nút tạo mới */
+.submit-btn {
+  padding: 8px 14px;
+  background: #007bff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+}
+
+.submit-btn:hover {
+  background: #0069d9;
+}
