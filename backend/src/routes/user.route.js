@@ -2,6 +2,7 @@ import express from "express";
 const router = express.Router();
 
 import {
+  loginUser,
   getUsers,
   registerUser,      // dùng registerUser cho frontend tạo user
   updateUser,
@@ -10,6 +11,7 @@ import {
 
 // Lấy danh sách user
 router.get("/", getUsers);
+router.post("/login", loginUser);
 
 // Tạo user từ frontend
 router.post("/", registerUser);

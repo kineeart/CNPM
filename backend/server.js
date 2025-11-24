@@ -15,6 +15,7 @@ import droneRoutes from "./src/routes/droneDeliveryRoutes.js";
 import zalopayRoutes from "./src/routes/zalopay.route.js";
 
 import "./src/models/associations.js";
+import addressRoutes from "./src/routes/address.routes.js";
 
 // ✅ Tạo app trước khi dùng
 const app = express();
@@ -23,6 +24,7 @@ const PORT = process.env.PORT || 3000;
 // ✅ Dùng middleware sau khi khởi tạo
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 
 // ✅ Đăng ký routes
   
@@ -38,6 +40,7 @@ app.use("/api/stores", storeRoutes);
 app.use("/api/dashboard", dashboardRouter);
 app.use("/api", droneRoutes);
 app.use("/api/zalopay", zalopayRoutes);
+app.use("/api/address", addressRoutes);
 
 // ✅ Test server
 app.get("/ping", (req, res) => {

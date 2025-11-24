@@ -1,23 +1,17 @@
 import React, { useEffect, useState } from "react";
 import "../css/Checkout.css";
-import Navbar from "../components/Navbar";  // 👈 THÊM
-
+import Navbar from "../components/Navbar";
 import axios from "axios";
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
-  const [form, setForm] = useState({
-    note: "",
-    deliveryAddress: "",
-    contactPhone: "",
-  });
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
 
+  // Lấy giỏ hàng
   const fetchCart = async () => {
     if (!userId) return;
     try {
@@ -33,99 +27,82 @@ const Checkout = () => {
     fetchCart();
   }, [userId]);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
+  // -------------- BỎ ZALOPAY — thay bằng checkout đơn giản ------------------
   const handleCheckout = async () => {
-  if (!userId || cartItems.length === 0) return;
-  setLoading(true);
-  setMessage("");
+    if (!userId || cartItems.length === 0) return;
 
-  try {
-    const res = await axios.post("http://localhost:3000/api/zalopay/create", {
-      userId,
-      totalAmount: cartTotal,
-      items: cartItems.map(i => ({
-        itemid: i.productId,
-        itemname: i.productName,
-        itemprice: i.productPrice,
-        itemquantity: i.quantity,
-      }))
-    });
+    setLoading(true);
 
-    if (res.data.returncode === 1 && res.data.orderurl) {
-      // redirect user sang ZaloPay
-      window.location.href = res.data.orderurl;
-    } else {
-      setMessage("❌ Tạo đơn ZaloPay thất bại: " + res.data.returnmessage);
+    try {
+      // Bạn có thể gửi dữ liệu đơn hàng vào backend nếu muốn
+      // tạm thời chỉ demo thành công
+      alert("🎉 Thanh toán thành công (demo – không dùng ZaloPay)!");
+    } catch (err) {
+      console.error("❌ Lỗi thanh toán:", err);
+      alert("❌ Lỗi thanh toán, vui lòng thử lại.");
     }
-  } catch (err) {
-    console.error("❌ Lỗi khi tạo đơn ZaloPay:", err);
-    setMessage("❌ Lỗi khi tạo đơn ZaloPay, thử lại sau.");
-  }
 
-  setLoading(false);
-};
-
+    setLoading(false);
+  };
 
   return (
     <>
-    <Navbar />  {/* Navbar xuất hiện ở mọi trang bạn đặt */}
-   <div className="checkout-container">
-  <h2>🛒 Thanh toán</h2>
-  <div className="checkout-content">
-    {/* Cột trái: danh sách sản phẩm */}
-   <div className="checkout-left">
-  {cartItems.length === 0 ? (
-    <p>Giỏ hàng trống</p>
-  ) : (
-    <div className="cart-items">
-      <div className="cart-header">
-        <span>Tên</span>
-        <span>SL</span>
-        <span>Tổng</span>
-      </div>
+      <Navbar />
 
-      {cartItems.map((item) => (
-        <div key={item.id} className="cart-row">
-          <span className="item-name">{item.productName}</span>
-          <span>{item.quantity}</span>
-          <span>{(item.quantity * item.productPrice).toLocaleString()} VNĐ</span>
+      <div className="checkout-container">
+        <h2>🛒 Thanh toán</h2>
+        <div className="checkout-content">
+
+          {/* Giỏ hàng */}
+          <div className="checkout-left">
+            {cartItems.length === 0 ? (
+              <p>Giỏ hàng trống</p>
+            ) : (
+              <div className="cart-items">
+                <div className="cart-header">
+                  <span>Tên</span>
+                  <span>SL</span>
+                  <span>Tổng</span>
+                </div>
+
+                {cartItems.map(item => (
+                  <div key={item.id} className="cart-row">
+                    <span className="item-name">{item.productName}</span>
+                    <span>{item.quantity}</span>
+                    <span>{(item.quantity * item.productPrice).toLocaleString()} VNĐ</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Tổng tiền */}
+          <div className="checkout-right">
+            <div className="cart-summary1">
+              <h3>Tổng giỏ hàng</h3>
+              <p>
+                Tổng số lượng:{" "}
+                <strong>{cartItems.reduce((s, i) => s + i.quantity, 0)}</strong>
+              </p>
+              <p>
+                Tổng tiền:{" "}
+                <strong>{cartTotal.toLocaleString()} VNĐ</strong>
+              </p>
+            </div>
+
+            <button
+              onClick={handleCheckout}
+              disabled={loading || cartItems.length === 0}
+              className="checkout-btn-green"
+            >
+              {loading ? "Đang xử lý..." : "Thanh toán"}
+            </button>
+          </div>
+
         </div>
-      ))}
-    </div>
-  )}
-</div>
-
-
-    {/* Cột phải: tổng số lượng và tổng tiền */}
-    <div className="checkout-right">
-  <div className="cart-summary1">
-    <h3>Tổng giỏ hàng</h3>
-    <p>
-      Tổng số lượng: <strong>{cartItems.reduce((s, i) => s + i.quantity, 0)}</strong>
-    </p>
-    <p>
-      Tổng tiền: <strong>{cartTotal.toLocaleString()} VNĐ</strong>
-    </p>
-  </div>
-
-  <button
-    onClick={handleCheckout}
-    disabled={loading || cartItems.length === 0 || !userId}
-    className="checkout-btn-green"
-  >
-    {loading ? "Đang xử lý..." : "Thanh toán"}
-  </button>
-</div>
-
-  </div>
-</div>
-
- </>
+      </div>
+    </>
   );
-  
 };
 
 export default Checkout;
