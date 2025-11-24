@@ -4,33 +4,46 @@ import { Order } from "../models/order.model.js";
 import { OrderItem } from "../models/orderItem.model.js";
 import { Product } from "../models/product.model.js";
 
+import axios from "axios";
+
 export const createOrder = async (req, res) => {
   try {
     const { userId, cartId, note, deliveryAddress, contactPhone } = req.body;
 
-    if (!userId || !cartId) {
-      return res.status(400).json({ message: "Thiếu thông tin userId hoặc cartId" });
+    if (!cartId || !userId) {
+      return res.status(400).json({ message: "Thiếu thông tin cartId hoặc userId" });
     }
 
-    // Lấy giỏ hàng
     const cart = await Cart.findOne({ where: { id: cartId, userId } });
     if (!cart) return res.status(404).json({ message: "Không tìm thấy giỏ hàng" });
 
     const items = await CartItem.findAll({ where: { cartId } });
     if (!items.length) return res.status(400).json({ message: "Giỏ hàng trống" });
 
-    // Tạo order
+    // ✅ Geocode địa chỉ
+    let lat = null, lng = null;
+    if (deliveryAddress) {
+      const geo = await axios.get("https://nominatim.openstreetmap.org/search", {
+        params: { q: deliveryAddress, format: "json", limit: 1 }
+      });
+      if (geo.data.length > 0) {
+        lat = parseFloat(geo.data[0].lat);
+        lng = parseFloat(geo.data[0].lon);
+      }
+    }
+
     const order = await Order.create({
       userId,
-      storeId: 1, // nếu cần storeId tạm
+      storeId: 1,
       status: "pending",
       totalPrice: cart.totalPrice,
       note: note || "",
       deliveryAddress: deliveryAddress || "",
       contactPhone: contactPhone || "",
+      latitude: lat,
+      longitude: lng
     });
 
-    // Tạo order items dựa trên cart items
     for (const item of items) {
       await OrderItem.create({
         orderId: order.id,
@@ -41,7 +54,6 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Xóa giỏ hàng sau khi tạo order
     await CartItem.destroy({ where: { cartId } });
     await cart.destroy();
 
@@ -51,6 +63,7 @@ export const createOrder = async (req, res) => {
     res.status(500).json({ message: "Lỗi server" });
   }
 };
+
 
 
 

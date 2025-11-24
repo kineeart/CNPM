@@ -16,6 +16,7 @@ import zalopayRoutes from "./src/routes/zalopay.route.js";
 
 import "./src/models/associations.js";
 import addressRoutes from "./src/routes/address.routes.js";
+import mapRouter from "./src/routes/map.routes.js";
 
 // ✅ Tạo app trước khi dùng
 const app = express();
@@ -25,6 +26,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
+app.use("/api/map", mapRouter);
 
 // ✅ Đăng ký routes
   
