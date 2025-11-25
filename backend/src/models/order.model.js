@@ -1,6 +1,7 @@
 import { DataTypes } from "sequelize";
 import { sequelize } from "../config/database.js";
 import { User } from "./user.model.js";
+import { Store } from "./store.model.js";  // thêm dòng này
 
 export const Order = sequelize.define("order", {
   id: {
@@ -34,3 +35,6 @@ export const Order = sequelize.define("order", {
 
 User.hasMany(Order, { foreignKey: "userId" });
 Order.belongsTo(User, { foreignKey: "userId" });
+
+Order.belongsTo(Store, { foreignKey: "storeId" });
+Store.hasMany(Order, { foreignKey: "storeId" });

@@ -19,7 +19,6 @@ import Customers from "./pages/Customers";
 import Orders from "./pages/Orders";
 import Products from "./pages/Products";
 import Store from "./pages/Store";
-import MapDrone from "./pages/MapDrone";
 
 // ⭐ Thêm trang quản lý drone
 import Drone from "./pages/Drone";   // <--- THÊM DÒNG NÀY
@@ -52,7 +51,7 @@ function App() {
 
         {/* ⭐ THÊM ROUTE DRONE */}
         <Route path="/drone" element={<Drone />} />   {/* <--- ROUTE MỚI */}
-              <Route path="/map" element={<MapDrone />} />
+ 
 
 
       </Routes>

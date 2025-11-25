@@ -16,8 +16,8 @@ import zalopayRoutes from "./src/routes/zalopay.route.js";
 
 import "./src/models/associations.js";
 import addressRoutes from "./src/routes/address.routes.js";
-import mapRouter from "./src/routes/map.routes.js";
 import geocodeRouter from "./src/routes/geocode.js";
+import droneDeliveryRoutes from "./src/routes/droneDeliveryRoutes.js";
 
 // ✅ Tạo app trước khi dùng
 const app = express();
@@ -27,7 +27,6 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
-app.use("/api/map", mapRouter);
 
 // ✅ Đăng ký routes
   
@@ -45,6 +44,7 @@ app.use("/api", droneRoutes);
 app.use("/api/zalopay", zalopayRoutes);
 app.use("/api/address", addressRoutes);
 app.use("/api/geocode", geocodeRouter);
+app.use("/api/drones", droneDeliveryRoutes);
 
 // ✅ Test server
 app.get("/ping", (req, res) => {

@@ -57,30 +57,40 @@ const Orders = () => {
   };
 
   // --- Lấy danh sách drone WAITING ---
-  const fetchAvailableDrones = async () => {
-    try {
-      const res = await axios.get(`${DRONE_API}/drones/waiting`);
-      setAvailableDrones(res.data);
-    } catch (err) {
-      console.error("❌ Lỗi lấy drone:", err);
-    }
-  };
+const fetchAvailableDrones = async () => {
+  try {
+    const res = await axios.get(`${DRONE_API}/drones/waiting`);
+    setAvailableDrones(res.data.data); // <--- đây là điểm quan trọng
+  } catch (err) {
+    console.error("❌ Lỗi lấy drone:", err);
+  }
+};
+
 
   // --- Gán drone cho đơn hàng (frontend) ---
   const assignDroneToOrder = async (droneId) => {
-    try {
-      await axios.post(`${DRONE_API}/drones/assign`, {
-        orderId: selectedOrderId,
-        droneId,
-      });
+  try {
+    // Gán drone
+    await axios.post(`${DRONE_API}/drones/assign`, {
+      orderId: selectedOrderId,
+      droneId,
+    });
 
-      alert("🚁 Drone đã được gán cho đơn hàng!");
-      setShowDronePopup(false);
-      fetchOrders();
-    } catch (err) {
-      console.error("❌ Lỗi gán drone:", err);
-    }
-  };
+    // ✅ Cập nhật trạng thái đơn hàng sang "delivering"
+    await axios.put(`${API_URL}/${selectedOrderId}`, { status: "delivering" });
+
+    alert("🚁 Drone đã được gán, đơn hàng đang vận chuyển!");
+    
+    // Đóng popup
+    setShowDronePopup(false);
+
+    // Refresh danh sách đơn
+    fetchOrders();
+  } catch (err) {
+    console.error("❌ Lỗi gán drone:", err);
+  }
+};
+
 
   // --- Render nút hành động ---
   const renderActionButton = (status, id) => {
@@ -107,7 +117,7 @@ const Orders = () => {
         {status === "delivering" && (
           <>
             <button onClick={() => handleAction(id, "success")}>Thành công</button>
-            <button onClick={() => handleAction(id, "failed")}>Hủy</button>
+           <button onClick={() => handleAction(id, "failed")}>Hủy</button>
           </>
         )}
       </>
