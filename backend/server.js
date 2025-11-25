@@ -17,6 +17,7 @@ import zalopayRoutes from "./src/routes/zalopay.route.js";
 import "./src/models/associations.js";
 import addressRoutes from "./src/routes/address.routes.js";
 import mapRouter from "./src/routes/map.routes.js";
+import geocodeRouter from "./src/routes/geocode.js";
 
 // ✅ Tạo app trước khi dùng
 const app = express();
@@ -43,6 +44,7 @@ app.use("/api/dashboard", dashboardRouter);
 app.use("/api", droneRoutes);
 app.use("/api/zalopay", zalopayRoutes);
 app.use("/api/address", addressRoutes);
+app.use("/api/geocode", geocodeRouter);
 
 // ✅ Test server
 app.get("/ping", (req, res) => {

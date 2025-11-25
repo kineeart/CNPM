@@ -1,14 +1,12 @@
+import axios from "axios";
+import { Order } from "../models/order.model.js";
 import { Cart } from "../models/cart.model.js";
 import { CartItem } from "../models/cartItem.model.js";
-import { Order } from "../models/order.model.js";
 import { OrderItem } from "../models/orderItem.model.js";
-import { Product } from "../models/product.model.js";
-
-import axios from "axios";
 
 export const createOrder = async (req, res) => {
   try {
-    const { userId, cartId, note, deliveryAddress, contactPhone } = req.body;
+    const { userId, cartId, note, deliveryAddress, contactPhone, latitude, longitude } = req.body;
 
     if (!cartId || !userId) {
       return res.status(400).json({ message: "Thiếu thông tin cartId hoặc userId" });
@@ -20,21 +18,27 @@ export const createOrder = async (req, res) => {
     const items = await CartItem.findAll({ where: { cartId } });
     if (!items.length) return res.status(400).json({ message: "Giỏ hàng trống" });
 
-    // ✅ Geocode địa chỉ
-    let lat = null, lng = null;
-    if (deliveryAddress) {
-      const geo = await axios.get("https://nominatim.openstreetmap.org/search", {
-        params: { q: deliveryAddress, format: "json", limit: 1 }
-      });
-      if (geo.data.length > 0) {
-        lat = parseFloat(geo.data[0].lat);
-        lng = parseFloat(geo.data[0].lon);
+    // Nếu frontend chưa gửi latitude/longitude, thử geocode từ địa chỉ
+    let lat = latitude ?? null;
+    let lng = longitude ?? null;
+
+    if ((!lat || !lng) && deliveryAddress) {
+      try {
+        const geo = await axios.get("https://nominatim.openstreetmap.org/search", {
+          params: { q: deliveryAddress, format: "json", limit: 1 }
+        });
+        if (geo.data.length > 0) {
+          lat = parseFloat(geo.data[0].lat);
+          lng = parseFloat(geo.data[0].lon);
+        }
+      } catch (err) {
+        console.error("❌ Lỗi geocode:", err.message);
       }
     }
 
     const order = await Order.create({
       userId,
-      storeId: 1,
+      storeId: 1, // có thể sửa tùy store
       status: "pending",
       totalPrice: cart.totalPrice,
       note: note || "",
@@ -43,6 +47,8 @@ export const createOrder = async (req, res) => {
       latitude: lat,
       longitude: lng
     });
+
+    console.log(`✅ Đã lưu order với tọa độ: latitude=${lat}, longitude=${lng}`);
 
     for (const item of items) {
       await OrderItem.create({
@@ -57,12 +63,14 @@ export const createOrder = async (req, res) => {
     await CartItem.destroy({ where: { cartId } });
     await cart.destroy();
 
-    res.status(201).json({ orderId: order.id, total: order.totalPrice });
+    res.status(201).json({ orderId: order.id, total: order.totalPrice, latitude: lat, longitude: lng });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Lỗi khi tạo đơn:", err);
     res.status(500).json({ message: "Lỗi server" });
   }
 };
+
+
 
 
 
@@ -130,3 +138,31 @@ export const updateOrderStatus = async (req, res) => {
   }
 };
 
+export const getOrderDetail = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const order = await Order.findByPk(id, {
+      include: [
+        {
+          model: OrderItem,
+          as: "items",
+          attributes: ["productName", "productPrice", "quantity"],
+        },
+      ],
+    });
+
+    if (!order) return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+
+    // Lấy info store
+    const store = await Store.findByPk(order.storeId);
+    
+    res.json({
+      order,
+      store,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Lỗi server" });
+  }
+};

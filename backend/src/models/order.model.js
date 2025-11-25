@@ -24,6 +24,8 @@ export const Order = sequelize.define("order", {
   note: DataTypes.STRING,
   deliveryAddress: DataTypes.STRING,
   contactPhone: DataTypes.STRING,
+    latitude: DataTypes.DOUBLE,    // thêm
+  longitude: DataTypes.DOUBLE,   // thêm
 }, {
   tableName: "order",
   timestamps: true,

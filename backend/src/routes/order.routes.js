@@ -1,5 +1,5 @@
 import express from "express";
-import { createOrder, getOrdersByUser ,updateOrderStatus,  getOrders } from "../controllers/order.controller.js";
+import { createOrder, getOrdersByUser ,updateOrderStatus,  getOrders, getOrderDetail } from "../controllers/order.controller.js";
 
 const router = express.Router();
 
@@ -13,5 +13,7 @@ router.get("/user/:id", getOrdersByUser);
 
 router.get("/", getOrders);
 router.put("/:id", updateOrderStatus);   // 👈 PHẢI CÓ DÒNG NÀY
+
+router.get("/:id/detail", getOrderDetail);  // API chi tiết đơn
 
 export default router;
