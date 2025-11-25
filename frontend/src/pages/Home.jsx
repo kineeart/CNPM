@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../css/HomePage.css";
 import Navbar from "../components/Navbar";  // 👈 THÊM
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Home = () => {
   
@@ -12,7 +13,7 @@ const Home = () => {
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/stores");
+        const res = await axios.get(`${BACKEND_URL}/api/stores`);
         setStores(res.data);
       } catch (err) {
         console.error("Lỗi khi tải danh sách cửa hàng:", err);

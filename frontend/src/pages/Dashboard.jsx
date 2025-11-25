@@ -49,7 +49,7 @@ const Dashboard = () => {
 
       {/* Nội dung bên phải */}
       <div className="dashboard-content" style={{ flex: 1, padding: "20px" }}>
-        <h1>👋 Tổng quan</h1>
+        <h1>Tổng quan</h1>
         <div
           className="stats"
           style={{ display: "flex", gap: "20px", marginTop: "20px", flexWrap: "wrap" }}
@@ -96,19 +96,7 @@ const Dashboard = () => {
             <p style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.products}</p>
           </div>
 
-          <div
-            className="stat-card"
-            style={{
-              flex: "1 1 200px",
-              padding: "20px",
-              background: "#ecf0f1",
-              borderRadius: "10px",
-              textAlign: "center",
-            }}
-          >
-            <h3>Nhà hàng</h3>
-            <p style={{ fontSize: "24px", fontWeight: "bold" }}>{stats.stores}</p>
-          </div>
+        
         </div>
       </div>
     </div>

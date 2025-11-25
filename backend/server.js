@@ -19,17 +19,20 @@ import addressRoutes from "./src/routes/address.routes.js";
 import geocodeRouter from "./src/routes/geocode.js";
 import droneDeliveryRoutes from "./src/routes/droneDeliveryRoutes.js";
 
-// ✅ Tạo app trước khi dùng
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ✅ Dùng middleware sau khi khởi tạo
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+// ✅ CORS: cho phép tất cả frontend (hoặc IP cụ thể)
+app.use(cors({
+  origin: "*",       // Có thể thay bằng IP frontend máy 2 nếu muốn giới hạn
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
-// ✅ Đăng ký routes
-  
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ✅ Routes
 app.use("/api/users", userRoutes);
 app.use("/api", authRoutes);
 app.use("/api", menuRoutes);
@@ -51,7 +54,11 @@ app.get("/ping", (req, res) => {
   res.json({ message: "🏓 Server vẫn sống!", time: new Date().toISOString() });
 });
 
-// ✅ Chạy server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+// ✅ Chạy server, bind tất cả IP để máy khác truy cập
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+});
+
+app.get("/", (req, res) => {
+  res.send("🚀 Backend FastFood Drone Delivery đang chạy!");
 });

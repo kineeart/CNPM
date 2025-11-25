@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../css/Drone.css";
-import Sidebar from "./Sidebar";
+import Sidebar from "./SidebarBigAdmin";
 
 const API_URL = "http://localhost:3000/api/drone-delivery";
 

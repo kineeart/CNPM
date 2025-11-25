@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../css/Cart.css"; // CSS riêng
 import Navbar from "../components/Navbar";  // 👈 THÊM
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Cart = () => {
   const [cart, setCart] = useState(null);
@@ -15,7 +16,7 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/cart/${userId}`);
+      const res = await axios.get(`${BACKEND_URL}/api/cart/${userId}`);
       setCart(res.data);
     } catch (err) {
       console.error("❌ Lỗi khi tải giỏ hàng:", err);
@@ -31,7 +32,7 @@ const Cart = () => {
 
   const increaseQty = async (cartItemId) => {
     try {
-      await axios.put(`http://localhost:3000/api/cart/update/${cartItemId}`, {
+      await axios.put(`${BACKEND_URL}/api/cart/update/${cartItemId}`, {
         quantity: 1,
         action: "increase",
       });
@@ -43,7 +44,7 @@ const Cart = () => {
 
   const decreaseQty = async (cartItemId) => {
     try {
-      await axios.put(`http://localhost:3000/api/cart/update/${cartItemId}`, {
+      await axios.put(`${BACKEND_URL}/api/cart/update/${cartItemId}`, {
         quantity: 1,
         action: "decrease",
       });
@@ -55,7 +56,7 @@ const Cart = () => {
 
   const removeItem = async (cartItemId) => {
     try {
-      await axios.delete(`http://localhost:3000/api/cart/remove/${cartItemId}`);
+      await axios.delete(`${BACKEND_URL}/api/cart/remove/${cartItemId}`);
       fetchCart();
     } catch (err) {
       console.error(err);

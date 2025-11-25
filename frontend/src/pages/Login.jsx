@@ -3,42 +3,50 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../css/Login.css";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  try {
-    const res = await axios.post("http://localhost:3000/api/users/login", {
-      email,
-      password,
-    });
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${BACKEND_URL}/api/users/login`, {
+        email,
+        password,
+      });
 
-    const token = res.data.token;
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const userId = payload?.id;
-    const userEmail = payload?.email;
-    const userRole = payload?.role;
+      const token = res.data.token;
+      const payload = JSON.parse(atob(token.split(".")[1]));
 
-    localStorage.setItem("token", token);
-    localStorage.setItem(
-      "user",
-      JSON.stringify({ id: userId, email: userEmail, role: userRole })
-    );
+      const userId = payload?.id;
+      const userEmail = payload?.email;
+      const userRole = payload?.role;
 
-    // ✅ Kiểm tra nếu là admin
-    if (userEmail === "admin@gmail.com" && password === "admin123") {
-      navigate("/Dashboard"); // chuyển sang Dashboard
-    } else {
-      navigate("/home"); // các user khác
+      // Lưu token và thông tin user
+      localStorage.setItem("token", token);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ id: userId, email: userEmail, role: userRole })
+      );
+
+      // ⭐ Điều hướng dựa vào ROLE
+if (userRole === "ADMIN") {
+  navigate("/dashboard-bigadmin");
+} else if (userRole === "STORE_ADMIN") {
+  navigate("/dashboard");
+} else {
+  navigate("/home");
+}
+
+
+    } catch (err) {
+      console.error("❌ Đăng nhập thất bại:", err.response?.data || err.message);
+      alert("Sai email hoặc mật khẩu!");
     }
-  } catch (err) {
-    console.error("❌ Đăng nhập thất bại:", err.response?.data || err.message);
-  }
-};
-
+  };
 
   return (
     <div className="login-background">

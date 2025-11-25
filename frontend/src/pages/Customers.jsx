@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Sidebar from "./Sidebar";
+import Sidebar from "./SidebarBigAdmin";
 import "../css/Customers.css";
 
 const API_URL = "http://localhost:3000/api/users";

@@ -4,17 +4,17 @@ import Navbar from "../components/Navbar";
 import axios from "axios";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { useNavigate } from "react-router-dom";
 
-// MapPicker với zoom tự động khi lat/lon thay đổi
+// ================= MAP PICKER =================
 const MapPicker = ({ lat, lon, setLat, setLon }) => {
   const defaultPosition = [lat || 10.7769, lon || 106.7009]; // HCM
 
-  // Zoom map khi lat/lon thay đổi
   const AutoZoom = () => {
     const map = useMap();
     useEffect(() => {
       if (lat && lon) {
-        map.setView([lat, lon], 16); // zoom vào vị trí mới
+        map.setView([lat, lon], 16);
       }
     }, [lat, lon, map]);
     return null;
@@ -25,17 +25,13 @@ const MapPicker = ({ lat, lon, setLat, setLon }) => {
       click(e) {
         setLat(e.latlng.lat);
         setLon(e.latlng.lng);
-      }
+      },
     });
     return null;
   };
 
   return (
-    <MapContainer
-      center={defaultPosition}
-      zoom={13}
-      style={{ height: "300px", width: "100%" }}
-    >
+    <MapContainer center={defaultPosition} zoom={13} style={{ height: "300px", width: "100%" }}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <Marker position={lat && lon ? [lat, lon] : defaultPosition} />
       <MapClickHandler />
@@ -45,6 +41,8 @@ const MapPicker = ({ lat, lon, setLat, setLon }) => {
 };
 
 const Checkout = () => {
+  const navigate = useNavigate(); // <-- FIXED HERE 💥
+
   const [cartItems, setCartItems] = useState([]);
   const [cartTotal, setCartTotal] = useState(0);
   const [form, setForm] = useState({ note: "", deliveryAddress: "", contactPhone: "" });
@@ -66,7 +64,7 @@ const Checkout = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?.id;
 
-  // fetch cart
+  // ========== FETCH CART ==========
   const fetchCart = async () => {
     if (!userId) return;
     try {
@@ -114,7 +112,7 @@ const Checkout = () => {
     if (district) setWards(district.Wards);
   }, [selectedDistrict, districts]);
 
-  // Zoom map theo tỉnh/quận/phường
+  // Lấy tọa độ khi chọn tỉnh / quận / phường
   useEffect(() => {
     if (!selectedCity) return;
 
@@ -129,7 +127,7 @@ const Checkout = () => {
     const fetchCoords = async () => {
       try {
         const res = await axios.get("https://nominatim.openstreetmap.org/search", {
-          params: { q: addressString, format: "json", limit: 1 }
+          params: { q: addressString, format: "json", limit: 1 },
         });
         if (res.data.length > 0) {
           setLatitude(parseFloat(res.data[0].lat));
@@ -147,17 +145,19 @@ const Checkout = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // ================= CHECKOUT =================
   const handleCheckout = async () => {
     if (!userId || cartItems.length === 0) return;
     setLoading(true);
     setMessage("");
 
-    // chỉ lưu tỉnh + quận/huyện + phường
     const deliveryAddress = [
       cities.find((c) => c.Id === selectedCity)?.Name,
       districts.find((d) => d.Id === selectedDistrict)?.Name,
       wards.find((w) => w.Id === selectedWard)?.Name,
-    ].filter(Boolean).join(", ");
+    ]
+      .filter(Boolean)
+      .join(", ");
 
     try {
       const res = await axios.post("http://localhost:3000/api/orders", {
@@ -167,18 +167,13 @@ const Checkout = () => {
         deliveryAddress,
         contactPhone: form.contactPhone,
         latitude,
-        longitude
+        longitude,
       });
 
-      setMessage(`✅ Tạo đơn thành công, orderId: ${res.data.orderId}`);
-      setCartItems([]);
-      setCartTotal(0);
-      setForm({ note: "", deliveryAddress: "", contactPhone: "" });
-      setSelectedCity("");
-      setSelectedDistrict("");
-      setSelectedWard("");
-      setLatitude(null);
-      setLongitude(null);
+      const orderId = res.data.orderId;
+
+      // ================= REDIRECT =================
+      navigate(`/zalopay-test?orderId=${orderId}`);
     } catch (err) {
       console.error("❌ Lỗi khi tạo đơn:", err);
       setMessage("❌ Lỗi khi tạo đơn, thử lại sau.");
@@ -192,8 +187,9 @@ const Checkout = () => {
       <Navbar />
       <div className="checkout-container">
         <h2>🛒 Thanh toán</h2>
+
         <div className="checkout-content">
-          {/* Cột trái: danh sách sản phẩm + form */}
+          {/* LEFT */}
           <div className="checkout-left">
             {cartItems.length === 0 ? (
               <p>Giỏ hàng trống</p>
@@ -204,6 +200,7 @@ const Checkout = () => {
                   <span>SL</span>
                   <span>Tổng</span>
                 </div>
+
                 {cartItems.map((item) => (
                   <div key={item.id} className="cart-row">
                     <span className="item-name">{item.productName}</span>
@@ -215,50 +212,36 @@ const Checkout = () => {
             )}
 
             <div className="checkout-form">
-            
-
-              <select
-                className="form-select form-select-sm mb-3"
-                value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
-              >
+              {/* Dropdown */}
+              <select value={selectedCity} onChange={(e) => setSelectedCity(e.target.value)}>
                 <option value="">Chọn tỉnh/thành</option>
                 {cities.map((c) => (
-                  <option key={c.Id} value={c.Id}>{c.Name}</option>
+                  <option key={c.Id} value={c.Id}>
+                    {c.Name}
+                  </option>
                 ))}
               </select>
 
-              <select
-                className="form-select form-select-sm mb-3"
-                value={selectedDistrict}
-                onChange={(e) => setSelectedDistrict(e.target.value)}
-              >
+              <select value={selectedDistrict} onChange={(e) => setSelectedDistrict(e.target.value)}>
                 <option value="">Chọn quận/huyện</option>
                 {districts.map((d) => (
-                  <option key={d.Id} value={d.Id}>{d.Name}</option>
+                  <option key={d.Id} value={d.Id}>
+                    {d.Name}
+                  </option>
                 ))}
               </select>
 
-              <select
-                className="form-select form-select-sm mb-3"
-                value={selectedWard}
-                onChange={(e) => setSelectedWard(e.target.value)}
-              >
+              <select value={selectedWard} onChange={(e) => setSelectedWard(e.target.value)}>
                 <option value="">Chọn phường/xã</option>
                 {wards.map((w) => (
-                  <option key={w.Id} value={w.Id}>{w.Name}</option>
+                  <option key={w.Id} value={w.Id}>
+                    {w.Name}
+                  </option>
                 ))}
               </select>
 
+              <input name="note" placeholder="Ghi chú" value={form.note} onChange={handleChange} />
               <input
-                type="text"
-                name="note"
-                placeholder="Ghi chú"
-                value={form.note}
-                onChange={handleChange}
-              />
-              <input
-                type="text"
                 name="contactPhone"
                 placeholder="Số điện thoại"
                 value={form.contactPhone}
@@ -267,26 +250,36 @@ const Checkout = () => {
 
               <h4>📍 Chọn vị trí trên bản đồ</h4>
               <MapPicker lat={latitude} lon={longitude} setLat={setLatitude} setLon={setLongitude} />
+
               {latitude && longitude && (
-                <p>Tọa độ đã chọn: {latitude.toFixed(6)}, {longitude.toFixed(6)}</p>
+                <p>
+                  Tọa độ: {latitude.toFixed(6)}, {longitude.toFixed(6)}
+                </p>
               )}
             </div>
           </div>
 
-          {/* Cột phải: tóm tắt */}
+          {/* RIGHT */}
           <div className="checkout-right">
             <div className="cart-summary1">
               <h3>Tổng giỏ hàng</h3>
-              <p>Tổng số lượng: <strong>{cartItems.reduce((s, i) => s + i.quantity, 0)}</strong></p>
-              <p>Tổng tiền: <strong>{cartTotal.toLocaleString()} VNĐ</strong></p>
+              <p>
+                Tổng số lượng:{" "}
+                <strong>{cartItems.reduce((sum, i) => sum + i.quantity, 0)}</strong>
+              </p>
+              <p>
+                Tổng tiền: <strong>{cartTotal.toLocaleString()} VNĐ</strong>
+              </p>
             </div>
+
             <button
               onClick={handleCheckout}
-              disabled={loading || cartItems.length === 0 || !userId}
+              disabled={loading || cartItems.length === 0}
               className="checkout-btn-green"
             >
               {loading ? "Đang xử lý..." : "Thanh toán"}
             </button>
+
             {message && <p>{message}</p>}
           </div>
         </div>
