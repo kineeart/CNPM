@@ -79,15 +79,27 @@ const PopupMap = ({ storeLat, storeLon, userLat, userLon, status, droneSpeed, or
     setDronePos([newLat, newLon]);
 
     // Đến nơi → cập nhật trạng thái
-   if (progress >= 1) {
+ if (progress >= 1) {
   clearInterval(timer);
 
-  await axios.put(`http://localhost:3000/api/orders/${orderId}`, {
-    status: "success",
-  });
+  try {
+    // 1️⃣ Cập nhật trạng thái đơn hàng
+    await axios.put(`http://localhost:3000/api/orders/${orderId}`, {
+      status: "success",
+    });
 
-  window.location.reload();  // 🔄 Reload lại trang
+    // 2️⃣ Cập nhật drone về trạng thái waiting
+    await axios.put(`http://localhost:3000/api/delivery/${orderId}/status`, {
+      status: "waiting",
+    });
+
+    // 3️⃣ Reload lại trang
+    window.location.reload();
+  } catch (err) {
+    console.error("❌ Lỗi cập nhật order/drone:", err);
+  }
 }
+
 
   }, 100);
 

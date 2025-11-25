@@ -215,13 +215,7 @@ const Checkout = () => {
             )}
 
             <div className="checkout-form">
-              <input
-                type="text"
-                name="deliveryAddress"
-                placeholder="Số nhà, tên đường"
-                value={form.deliveryAddress}
-                onChange={handleChange}
-              />
+            
 
               <select
                 className="form-select form-select-sm mb-3"
