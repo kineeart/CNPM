@@ -31,39 +31,77 @@ export const getStoreById = async (req, res) => {
 // ✅ Tạo mới cửa hàng
 export const createStore = async (req, res) => {
   try {
-    const { ownerId, name, description, address, phone, email } = req.body;
+    const { ownerId, name, description, address, ward, district, province, phone, email, isActive, latitude, longitude } = req.body;
 
-    if (!ownerId || !name)
-      return res.status(400).json({ message: "Thiếu thông tin bắt buộc: ownerId, name" });
+    // Nếu chưa có latitude/longitude, geocode từ địa chỉ
+    let lat = latitude ?? null;
+    let lng = longitude ?? null;
+
+    if ((!lat || !lng) && address && ward && district && province) {
+      const fullAddress = [address, ward, district, province].filter(Boolean).join(", ");
+      try {
+        const geo = await axios.get("https://nominatim.openstreetmap.org/search", {
+          params: { q: fullAddress, format: "json", limit: 1 }
+        });
+        if (geo.data.length > 0) {
+          lat = parseFloat(geo.data[0].lat);
+          lng = parseFloat(geo.data[0].lon);
+        }
+      } catch (err) {
+        console.error("❌ Lỗi geocode:", err.message);
+      }
+    }
 
     const store = await Store.create({
-      ownerId,
-      name,
-      description,
-      address,
-      phone,
-      email,
+      ownerId, name, description, address, ward, district, province, phone, email, isActive,
+      latitude: lat,
+      longitude: lng
     });
 
-    res.status(201).json({ message: "✅ Tạo cửa hàng thành công", store });
-  } catch (error) {
-    console.error("❌ Lỗi createStore:", error);
-    res.status(500).json({ message: "Lỗi server khi tạo cửa hàng" });
+    res.status(201).json(store);
+  } catch (err) {
+    console.error("❌ Lỗi createStore:", err);
+    res.status(500).json({ message: "Lỗi server" });
   }
 };
 
-// ✅ Cập nhật thông tin cửa hàng
 export const updateStore = async (req, res) => {
   try {
     const { id } = req.params;
-    const store = await Store.findByPk(id);
-    if (!store) return res.status(404).json({ message: "❌ Cửa hàng không tồn tại" });
+    const { ownerId, name, description, address, ward, district, province, phone, email, isActive, latitude, longitude } = req.body;
 
-    await store.update(req.body);
-    res.json({ message: "✅ Cập nhật cửa hàng thành công", store });
-  } catch (error) {
-    console.error("❌ Lỗi updateStore:", error);
-    res.status(500).json({ message: "Lỗi server khi cập nhật cửa hàng" });
+    const store = await Store.findByPk(id);
+    if (!store) return res.status(404).json({ message: "Không tìm thấy cửa hàng" });
+
+    let lat = latitude ?? store.latitude;
+    let lng = longitude ?? store.longitude;
+
+    // Nếu chưa có latitude/longitude, geocode từ địa chỉ
+    if ((!lat || !lng) && address && ward && district && province) {
+      const fullAddress = [address, ward, district, province].filter(Boolean).join(", ");
+      try {
+        const geo = await axios.get("https://nominatim.openstreetmap.org/search", {
+          params: { q: fullAddress, format: "json", limit: 1 }
+        });
+        if (geo.data.length > 0) {
+          lat = parseFloat(geo.data[0].lat);
+          lng = parseFloat(geo.data[0].lon);
+        }
+      } catch (err) {
+        console.error("❌ Lỗi geocode:", err.message);
+      }
+    }
+
+    await store.update({
+      ownerId, name, description, address, ward, district, province, phone, email, isActive,
+      latitude: lat,
+      longitude: lng
+    });
+
+    res.status(200).json(store);
+  } catch (err) {
+    console.error("❌ Lỗi updateStore:", err);
+    res.status(500).json({ message: "Lỗi server" });
   }
 };
 

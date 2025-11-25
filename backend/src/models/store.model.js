@@ -45,6 +45,8 @@ export const Store = sequelize.define(
     email: {
       type: DataTypes.STRING,
     },
+      latitude: DataTypes.DOUBLE,    // thêm
+  longitude: DataTypes.DOUBLE,   // thêm
     isActive: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
