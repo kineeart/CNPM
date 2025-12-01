@@ -102,3 +102,18 @@
   margin-top: 40px;
   font-style: italic;
 }
+/* Banner Home page */
+.home-banner {
+  display: flex;
+  justify-content: center; /* căn giữa ngang */
+  padding: 12px 0;         /* khoảng cách trên/dưới */
+  background-color: #f5f5f5; /* có thể thêm nền nhẹ nếu muốn */
+}
+
+.home-banner img {
+  max-width: 90%;    /* chiếm tối đa 90% chiều ngang */
+  height: auto;      /* giữ tỉ lệ ảnh */
+  border-radius: 12px; /* bo tròn góc banner */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* bóng nhẹ */
+  object-fit: cover;
+}

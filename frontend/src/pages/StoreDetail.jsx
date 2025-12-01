@@ -52,7 +52,7 @@ const StoreDetail = () => {
         productId: product.id,
         quantity: 1,
       });
-      setNotification({ message: "✅ Thêm sản phẩm thành công!", type: "success" });
+      setNotification({ message: "Thêm sản phẩm thành công!", type: "success" });
       setTimeout(() => setNotification(null), 3000);
     } catch (err) {
       console.error("❌ Lỗi khi thêm giỏ hàng:", err.response?.data || err.message);
@@ -72,29 +72,47 @@ const StoreDetail = () => {
         onClose={() => setNotification(null)} 
       />
       <div className="store-detail-container">
-        <h2 className="store-header">🛍️ {store.name}</h2>
-
-        {products.length === 0 ? (
-          <p className="loading-text">Không có sản phẩm nào trong cửa hàng này.</p>
-        ) : (
-          <div className="product-grid">
-            {products.map((product) => (
-              <div key={product.id} className="product-card">
-                <div
-                  className="product-image"
-                  style={{ backgroundImage: `url(${product.imageUrl})` }}
-                ></div>
-                <div className="product-info">
-                  <h3>{product.name}</h3>
-                  <p>{product.description}</p>
-                  <strong>{product.price} VNĐ</strong>
-                  <button onClick={() => handleAddToCart(product)}>🛒 Thêm vào giỏ</button>
-                </div>
-              </div>
-            ))}
+      <div className="store-detail-wrapper">
+        {/* Div trái */}
+        <div className="store-left">
+          {store.avatar && (
+            <div
+              className="store-avatar"
+              style={{ backgroundImage: `url(${store.avatar})` }}
+            />
+          )}
+          <div className="store-description">
+            <h2>{store.name}</h2>
+            <p>{store.description}</p>
           </div>
-        )}
+        </div>
+
+        {/* Div phải */}
+        <div className="store-right">
+          <h3>Sản phẩm</h3>
+          {products.length === 0 ? (
+            <p className="loading-text">Chưa có sản phẩm nào.</p>
+          ) : (
+            <div className="product-grid">
+              {products.map((prod) => (
+                <div key={prod.id} className="product-card">
+                  <div
+                    className="product-image"
+                    style={{ backgroundImage: `url(${prod.imageUrl})` }}
+                  />
+                  <div className="product-info">
+                    <h3>{prod.name}</h3>
+                    <p>{prod.description}</p>
+                    <strong>{prod.price.toLocaleString()}₫</strong>
+                    <button>Thêm vào giỏ</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
+    </div>
     </>
   );
 };

@@ -32,11 +32,6 @@ const Navbar = () => {
     navigate("/my-orders");
   };
 
-  const goToProfile = () => {
-    setIsDropdownOpen(false);
-    navigate("/profile");
-  };
-
   const handleLogout = () => {
     localStorage.removeItem("user");
     setIsDropdownOpen(false);
@@ -47,7 +42,12 @@ const Navbar = () => {
   return (
     <div className="navbar">
       <div className="logo" onClick={() => navigate("/home")}>
-        🚀 MyFoodApp
+        {/* Thay chữ MyFoodApp bằng logo */}
+        <img 
+          src="/icons/logostore.png" 
+          alt="Logo" 
+          style={{  cursor: "pointer" }} 
+        />
       </div>
 
       <div className="nav-actions">

@@ -16,7 +16,7 @@ const Cart = () => {
 
   const fetchCart = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/api/cart/${userId}`);
+      const res = await axios.get(`${BACKEND_URL}/cart/${userId}`);
       setCart(res.data);
     } catch (err) {
       console.error("❌ Lỗi khi tải giỏ hàng:", err);
@@ -32,7 +32,7 @@ const Cart = () => {
 
   const increaseQty = async (cartItemId) => {
     try {
-      await axios.put(`${BACKEND_URL}/api/cart/update/${cartItemId}`, {
+      await axios.put(`${BACKEND_URL}/cart/update/${cartItemId}`, {
         quantity: 1,
         action: "increase",
       });
@@ -56,7 +56,7 @@ const Cart = () => {
 
   const removeItem = async (cartItemId) => {
     try {
-      await axios.delete(`${BACKEND_URL}/api/cart/remove/${cartItemId}`);
+      await axios.delete(`${BACKEND_URL}/cart/remove/${cartItemId}`);
       fetchCart();
     } catch (err) {
       console.error(err);

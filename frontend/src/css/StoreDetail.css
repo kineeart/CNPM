@@ -4,26 +4,72 @@
   padding: 20px;
   box-sizing: border-box;
   font-family: "Segoe UI", Tahoma, sans-serif;
-  background-color: #f9f9f9; /* Nền tổng thể */
+  background-color: #f9f9f9;
 }
 
-.store-header {
-  font-size: 28px;
+.store-detail-wrapper {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  position: relative; /* để dùng pseudo-element nếu muốn */
+}
+
+/* Cách 1: border-right cho div trái */
+.store-left {
+  flex: 1 1 250px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+
+  border-right: 2px solid #ccc; /* 🔹 đường dọc phân chia */
+  padding-right: 20px;           /* cách nội dung so với border */
+}
+
+.store-avatar {
+  width: 100%;
+  height: 300px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(2px);
+  border-radius: 12px;
+}
+
+.store-description {
+  text-align: center;
+}
+
+.store-description h2 {
+  margin: 10px 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.store-description p {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Div phải */
+.store-right {
+  flex: 3 1 600px; /* chiếm nhiều diện tích */
+}
+
+.store-right h3 {
   margin-bottom: 20px;
   color: #333;
 }
 
-/* GRID 3 CỘT */
+/* Product grid & card đã có */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr); /* 3 cột cố định */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 20px;
 }
 
-/* CARD SẢN PHẨM */
 .product-card {
   background: #fff;
-  border: 1px solid #000;       /* 🔹 Viền đen */
   border-radius: 12px;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -37,36 +83,30 @@
   box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
-/* ẢNH */
 .product-image {
-  width: 90%;            /* 90% chiều ngang card */
-  height: 180px;         /* chiều cao */
+  width: 90%;
+  height: 180px;
   background-size: cover;
   background-position: center;
+  margin: 10px auto;
+  border-radius: 8px;
   transition: transform 0.3s ease;
-
-  display: block;        /* để margin auto hoạt động */
-  margin: 0 auto;        /* căn giữa ngang */
-  border-radius: 8px;    /* tùy chọn, đẹp hơn */
 }
-
 
 .product-card:hover .product-image {
   transform: scale(1.05);
 }
 
-/* Info */
 .product-info {
-  padding: 30px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  text-align: left;
 }
 
 .product-info h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   color: #333;
 }
 
@@ -77,18 +117,19 @@
 }
 
 .product-info strong {
-  font-size: 16px;
+  font-size: 14px;
   color: #f43c55;
 }
 
 .product-info button {
-  padding: 10px 15px;
+  padding: 8px 12px;
   background: #4caf50;
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   color: white;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
+  margin-top: 8px;
   transition: 0.2s;
 }
 
@@ -97,10 +138,12 @@
   transform: scale(1.05);
 }
 
-/* Loading */
-.loading-text {
-  text-align: center;
-  color: #777;
-  font-style: italic;
-  margin-top: 40px;
+/* Responsive */
+@media (max-width: 900px) {
+  .store-detail-wrapper {
+    flex-direction: column;
+  }
+  .store-left, .store-right {
+    max-width: 100%;
+  }
 }
