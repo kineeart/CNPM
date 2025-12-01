@@ -13,7 +13,7 @@ const Home = () => {
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const res = await axios.get(`${BACKEND_URL}/api/stores`);
+        const res = await axios.get(`${BACKEND_URL}/stores`);
         setStores(res.data);
       } catch (err) {
         console.error("Lỗi khi tải danh sách cửa hàng:", err);

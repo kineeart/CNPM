@@ -5,6 +5,8 @@ import axios from "axios";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useNavigate } from "react-router-dom";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 // ================= MAP PICKER =================
 const MapPicker = ({ lat, lon, setLat, setLon }) => {
@@ -68,7 +70,7 @@ const Checkout = () => {
   const fetchCart = async () => {
     if (!userId) return;
     try {
-      const res = await axios.get(`http://localhost:3000/api/cart/user/${userId}`);
+      const res = await axios.get(`${BACKEND_URL}/cart/user/${userId}`);
       setCartItems(res.data.cartitems || []);
       setCartTotal(res.data.totalPrice || 0);
     } catch (err) {
@@ -160,15 +162,16 @@ const Checkout = () => {
       .join(", ");
 
     try {
-      const res = await axios.post("http://localhost:3000/api/orders", {
-        userId,
-        cartId: cartItems[0]?.cartId,
-        note: form.note,
-        deliveryAddress,
-        contactPhone: form.contactPhone,
-        latitude,
-        longitude,
-      });
+     const res = await axios.post(`${BACKEND_URL}/orders`, {
+    userId,
+    cartId: cartItems[0]?.cartId,
+    note: form.note,
+    deliveryAddress,
+    contactPhone: form.contactPhone,
+    latitude,
+    longitude,
+});
+
 
       const orderId = res.data.orderId;
 

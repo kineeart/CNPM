@@ -152,3 +152,32 @@ router.post("/assign", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+// src/routes/droneDeliveryRoutes.js
+router.post("/drone-delivery/:id/assign", async (req, res) => {
+  try {
+    const droneId = req.params.id;
+    const { storeId } = req.body;
+
+    if (!storeId) return res.status(400).json({ error: "Thiếu storeId" });
+
+    const drone = await DroneDelivery.findByPk(droneId);
+    if (!drone) return res.status(404).json({ error: "Drone không tồn tại" });
+
+    if (drone.status !== "WAITING") {
+      return res.status(400).json({ error: "Drone đang bận" });
+    }
+
+    drone.storeId = storeId;
+    drone.status = "ASSIGNED"; // trạng thái đã phân phối
+    await drone.save();
+
+    res.json({ message: "🚀 Drone đã được phân phối đến cửa hàng", drone });
+  } catch (err) {
+    console.error("❌ Lỗi assign drone:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+

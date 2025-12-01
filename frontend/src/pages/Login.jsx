@@ -13,10 +13,11 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${BACKEND_URL}/api/users/login`, {
-        email,
-        password,
-      });
+      const res = await axios.post(`${BACKEND_URL}/users/login`, {
+  email,
+  password,
+});
+
 
       const token = res.data.token;
       const payload = JSON.parse(atob(token.split(".")[1]));

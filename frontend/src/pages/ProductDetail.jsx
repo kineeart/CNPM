@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -10,7 +11,7 @@ const ProductDetail = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/api/products/${id}`);
+        const res = await axios.get(`${BACKEND_URL}/products/${id}`);
         setProduct(res.data);
       } catch (err) {
         console.error("❌ Lỗi khi lấy chi tiết sản phẩm:", err);
@@ -29,7 +30,7 @@ const ProductDetail = () => {
     }
 
     try {
-      await axios.post("http://localhost:3000/api/cart/add", {
+      await axios.post("${BACKEND_URL}/api/cart/add", {
         userId,
         productId: product.id,
         quantity: 1,
@@ -81,7 +82,7 @@ const ProductDetail = () => {
           zIndex: 9999,
           animation: "fadeInOut 2s forwards",
         }}>
-          ✅ Thêm sản phẩm vào giỏ hàng thành công!
+          Thêm sản phẩm vào giỏ hàng thành công!
         </div>
       )}
 

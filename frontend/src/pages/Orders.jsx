@@ -6,12 +6,12 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet"
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const API_URL = "http://localhost:3000/api/orders";
-const DRONE_API = "http://localhost:3000/api";
+const API_URL = import.meta.env.VITE_BACKEND_URL+"/orders";
+const DRONE_API = import.meta.env.VITE_BACKEND_URL;
 
 const fetchStore = async (storeId) => {
   try {
-    const res = await axios.get(`http://localhost:3000/api/stores/${storeId}`);
+    const res = await axios.get(`http://10.112.28.37:3000/api/stores/${storeId}`);
     return res.data;
   } catch (err) {
     console.error("❌ Lỗi lấy thông tin store:", err);

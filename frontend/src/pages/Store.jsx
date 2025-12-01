@@ -5,8 +5,9 @@ import "../css/Store.css";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
-const API_URL = "http://localhost:3000/api/stores";
-const API_USER_URL = "http://localhost:3000/api/users"; // để lấy STORE_ADMIN
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL = `${BACKEND_URL}/stores`;
+const API_USER_URL = `${BACKEND_URL}/users`; // để lấy STORE_ADMIN
 
 // ---------- MapPicker ----------
 const MapPicker = ({ lat, lon, setLat, setLon }) => {

@@ -12,6 +12,7 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import CustomerOrder from "./pages/CustomerOrder";
+import Notification from "./components/Notification";
 
 // ==== STORE ADMIN ====
 import Dashboard from "./pages/Dashboard";
@@ -45,6 +46,7 @@ function App() {
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/my-orders" element={<CustomerOrder />} />
+        <Route path="/notifi" element={<Notification />} />
 
         {/* ==== STORE ADMIN ==== */}
         <Route path="/dashboard" element={<Dashboard />} />

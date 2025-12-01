@@ -42,6 +42,11 @@ const DroneDelivery = sequelize.define(
       type: DataTypes.STRING, // "lat,lng"
       allowNull: true,
     },
+    storeId: {
+  type: DataTypes.INTEGER,
+  allowNull: true,
+},
+
   },
   {
     tableName: "dronedelivery",

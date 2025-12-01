@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../css/Dashboard.css";
 import Sidebar from "./SidebarBigAdmin"; // import Sidebar
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 import { useNavigate } from "react-router-dom";
 
@@ -31,7 +32,7 @@ const DashboardBigAdmin = () => {
  useEffect(() => {
   const fetchStats = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/dashboard/stats");
+      const res = await axios.get(`http://localhost:3000/api/dashboard/stats`);
       setStats(res.data);
     } catch (err) {
       console.error("❌ Lỗi khi tải số liệu thống kê:", err);

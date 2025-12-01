@@ -7,6 +7,8 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet"
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
 // Haversine distance (km)
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
@@ -43,69 +45,62 @@ const droneIcon = new L.Icon({
   iconAnchor: [20, 20],
 });
 
-// MAP POPUP + DRONE ANIMATION
-const PopupMap = ({ storeLat, storeLon, userLat, userLon, status, droneSpeed, orderId, onClose }) => {
-
+// POPUP MAP + DRONE ANIMATION
+const PopupMap = ({
+  storeLat,
+  storeLon,
+  userLat,
+  userLon,
+  status,
+  droneSpeed,
+  orderId,
+  onClose,
+}) => {
   const [dronePos, setDronePos] = useState([storeLat, storeLon]);
 
-  // ---- FIX SPEED ----
   const speed = Number(droneSpeed) > 0 ? Number(droneSpeed) : 30;
 
- useEffect(() => {
-  if (status !== "delivering") return;
+  useEffect(() => {
+    if (status !== "delivering") return;
 
-  if (!dronePos) {
-    setDronePos([storeLat, storeLon]);
-  }
+    const totalDistance = haversineDistance(storeLat, storeLon, userLat, userLon);
 
-  const totalDistance = haversineDistance(storeLat, storeLon, userLat, userLon);
+    const speedMultiplier = 1000;
+    const adjustedSpeed = speed * speedMultiplier;
 
-  // Test nhanh hơn (x2, x3, x5 ...)
-  const speedMultiplier = 1000;
-  const adjustedSpeed = speed * speedMultiplier;
+    const totalTimeMs = (totalDistance / adjustedSpeed) * 3600 * 1000;
+    const startTime = Date.now();
 
-  // Tổng thời gian bay (ms)
-  const totalTimeMs = (totalDistance / adjustedSpeed) * 3600 * 1000;
+    const timer = setInterval(async () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / totalTimeMs, 1);
 
-  const startTime = Date.now();
+      const newLat = storeLat + (userLat - storeLat) * progress;
+      const newLon = storeLon + (userLon - storeLon) * progress;
 
-  const timer = setInterval(async () => {
-    const elapsed = Date.now() - startTime;
-    const progress = Math.min(elapsed / totalTimeMs, 1);
+      setDronePos([newLat, newLon]);
 
-    const newLat = storeLat + (userLat - storeLat) * progress;
-    const newLon = storeLon + (userLon - storeLon) * progress;
+      if (progress >= 1) {
+        clearInterval(timer);
 
-    setDronePos([newLat, newLon]);
+        try {
+          await axios.put(`${BACKEND_URL}/orders/${orderId}`, {
+            status: "success",
+          });
 
-    // Đến nơi → cập nhật trạng thái
- if (progress >= 1) {
-  clearInterval(timer);
+          await axios.put(`${BACKEND_URL}/delivery/${orderId}/status`, {
+            status: "waiting",
+          });
 
-  try {
-    // 1️⃣ Cập nhật trạng thái đơn hàng
-    await axios.put(`http://localhost:3000/api/orders/${orderId}`, {
-      status: "success",
-    });
+          window.location.reload();
+        } catch (err) {
+          console.error("Lỗi cập nhật order/drone:", err);
+        }
+      }
+    }, 100);
 
-    // 2️⃣ Cập nhật drone về trạng thái waiting
-    await axios.put(`http://localhost:3000/api/delivery/${orderId}/status`, {
-      status: "waiting",
-    });
-
-    // 3️⃣ Reload lại trang
-    window.location.reload();
-  } catch (err) {
-    console.error("❌ Lỗi cập nhật order/drone:", err);
-  }
-}
-
-
-  }, 100);
-
-  return () => clearInterval(timer);
-}, [status, speed, storeLat, storeLon, userLat, userLon]);
-
+    return () => clearInterval(timer);
+  }, [status, speed, storeLat, storeLon, userLat, userLon]);
 
   const distance = haversineDistance(storeLat, storeLon, userLat, userLon);
   const estMinutes = (distance / 100) * 60;
@@ -126,17 +121,14 @@ const PopupMap = ({ storeLat, storeLon, userLat, userLon, status, droneSpeed, or
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-          {/* Store */}
           <Marker position={[storeLat, storeLon]} icon={storeIcon}>
             <Popup>Store</Popup>
           </Marker>
 
-          {/* User */}
           <Marker position={[userLat, userLon]} icon={userIcon}>
             <Popup>Khách hàng</Popup>
           </Marker>
 
-          {/* Drone */}
           <Marker position={dronePos} icon={droneIcon}>
             <Popup>Drone đang bay 🚀</Popup>
           </Marker>
@@ -189,9 +181,7 @@ const CustomerOrder = () => {
 
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:3000/api/orders/user/${userId}`
-        );
+        const res = await axios.get(`${BACKEND_URL}/orders/user/${userId}`);
         setOrders(res.data.orders || []);
       } catch (err) {
         console.error(err);
@@ -247,9 +237,7 @@ const CustomerOrder = () => {
                   <td>
                     {new Intl.NumberFormat("vi-VN").format(order.totalPrice)} VNĐ
                   </td>
-                  <td>
-                    {new Date(order.createdAt).toLocaleDateString("vi-VN")}
-                  </td>
+                  <td>{new Date(order.createdAt).toLocaleDateString("vi-VN")}</td>
                   <td>
                     {STATUS_MAP[order.status]?.icon}{" "}
                     {STATUS_MAP[order.status]?.label}
@@ -272,17 +260,16 @@ const CustomerOrder = () => {
             storeLat != null &&
             userLat != null &&
             selectedOrder && (
-          <PopupMap
-  storeLat={storeLat}
-  storeLon={storeLon}
-  userLat={userLat}
-  userLon={userLon}
-  status={selectedOrder.status}
-  droneSpeed={selectedOrder.Drone?.speed}
-  orderId={selectedOrder.id}   //<--- thêm dòng này
-  onClose={closePopup}
-/>
-
+              <PopupMap
+                storeLat={storeLat}
+                storeLon={storeLon}
+                userLat={userLat}
+                userLon={userLon}
+                status={selectedOrder.status}
+                droneSpeed={selectedOrder.Drone?.speed}
+                orderId={selectedOrder.id}
+                onClose={closePopup}
+              />
             )}
         </div>
       </div>

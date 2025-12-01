@@ -3,8 +3,9 @@ import axios from "axios";
 import Sidebar from "./Sidebar";
 import "../css/Products.css";
 
-const API_URL = "http://localhost:3000/api/products";
-const STORE_API = "http://localhost:3000/api/stores";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const API_USERS = `${BACKEND_URL}/users`;
+const API_PRODUCTS = `${BACKEND_URL}/products`;
 
 const Products = () => {
   const [products, setProducts] = useState([]);

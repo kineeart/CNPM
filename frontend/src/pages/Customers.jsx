@@ -3,7 +3,8 @@ import axios from "axios";
 import Sidebar from "./SidebarBigAdmin";
 import "../css/Customers.css";
 
-const API_URL = "http://localhost:3000/api/users";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const API_URL = `${BACKEND_URL}/users`;
 
 const Customers = () => {
   const [users, setUsers] = useState([]);
