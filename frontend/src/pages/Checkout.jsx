@@ -70,7 +70,8 @@ const Checkout = () => {
   const fetchCart = async () => {
     if (!userId) return;
     try {
-      const res = await axios.get(`${BACKEND_URL}/cart/user/${userId}`);
+      // Đồng bộ với Cart.jsx: /cart/:userId
+      const res = await axios.get(`${BACKEND_URL}/cart/${userId}`);
       setCartItems(res.data.cartitems || []);
       setCartTotal(res.data.totalPrice || 0);
     } catch (err) {
@@ -152,36 +153,28 @@ const Checkout = () => {
     if (!userId || cartItems.length === 0) return;
     setLoading(true);
     setMessage("");
-
     const deliveryAddress = [
       cities.find((c) => c.Id === selectedCity)?.Name,
       districts.find((d) => d.Id === selectedDistrict)?.Name,
       wards.find((w) => w.Id === selectedWard)?.Name,
-    ]
-      .filter(Boolean)
-      .join(", ");
+    ].filter(Boolean).join(", ");
 
     try {
-     const res = await axios.post(`${BACKEND_URL}/orders`, {
-    userId,
-    cartId: cartItems[0]?.cartId,
-    note: form.note,
-    deliveryAddress,
-    contactPhone: form.contactPhone,
-    latitude,
-    longitude,
-});
-
-
+      const res = await axios.post(`${BACKEND_URL}/orders`, {
+        userId,
+        cartId: cartItems[0]?.cartId, // backend sẽ tự tìm theo userId nếu thiếu
+        note: form.note,
+        deliveryAddress,
+        contactPhone: form.contactPhone,
+        latitude,
+        longitude,
+      });
       const orderId = res.data.orderId;
-
-      // ================= REDIRECT =================
       navigate(`/zalopay-test?orderId=${orderId}`);
     } catch (err) {
       console.error("❌ Lỗi khi tạo đơn:", err);
       setMessage("❌ Lỗi khi tạo đơn, thử lại sau.");
     }
-
     setLoading(false);
   };
 

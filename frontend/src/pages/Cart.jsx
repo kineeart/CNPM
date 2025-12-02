@@ -44,7 +44,7 @@ const Cart = () => {
 
   const decreaseQty = async (cartItemId) => {
     try {
-      await axios.put(`${BACKEND_URL}/api/cart/update/${cartItemId}`, {
+      await axios.put(`${BACKEND_URL}/cart/update/${cartItemId}`, {
         quantity: 1,
         action: "decrease",
       });

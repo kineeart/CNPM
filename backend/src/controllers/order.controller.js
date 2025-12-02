@@ -1,77 +1,74 @@
 import axios from "axios";
-import { Order } from "../models/order.model.js";
 import { Cart } from "../models/cart.model.js";
 import { CartItem } from "../models/cartItem.model.js";
+import { Product } from "../models/product.model.js";
+import { Order } from "../models/order.model.js";
 import { OrderItem } from "../models/orderItem.model.js";
 import { Store } from "../models/store.model.js";
 
 export const createOrder = async (req, res) => {
   try {
     const { userId, cartId, note, deliveryAddress, contactPhone, latitude, longitude } = req.body;
+    if (!userId) return res.status(400).json({ message: "Thiếu userId" });
 
-    if (!cartId || !userId) {
-      return res.status(400).json({ message: "Thiếu thông tin cartId hoặc userId" });
+    // 1) Lấy cart
+    let cid = cartId;
+    if (!cid) {
+      const cart = await Cart.findOne({ where: { userId } });
+      if (!cart) return res.status(400).json({ message: "Không tìm thấy giỏ hàng" });
+      cid = cart.id;
     }
 
-    const cart = await Cart.findOne({ where: { id: cartId, userId } });
-    if (!cart) return res.status(404).json({ message: "Không tìm thấy giỏ hàng" });
-
-    const items = await CartItem.findAll({ where: { cartId } });
-    if (!items.length) return res.status(400).json({ message: "Giỏ hàng trống" });
-
-    // Nếu frontend chưa gửi latitude/longitude, thử geocode từ địa chỉ
-    let lat = latitude ?? null;
-    let lng = longitude ?? null;
-
-    if ((!lat || !lng) && deliveryAddress) {
-      try {
-        const geo = await axios.get("https://nominatim.openstreetmap.org/search", {
-          params: { q: deliveryAddress, format: "json", limit: 1 }
-        });
-        if (geo.data.length > 0) {
-          lat = parseFloat(geo.data[0].lat);
-          lng = parseFloat(geo.data[0].lon);
-        }
-      } catch (err) {
-        console.error("❌ Lỗi geocode:", err.message);
-      }
-    }
-
-    const order = await Order.create({
-      userId,
-      storeId: 1, // có thể sửa tùy store
-      status: "pending",
-      totalPrice: cart.totalPrice,
-      note: note || "",
-      deliveryAddress: deliveryAddress || "",
-      contactPhone: contactPhone || "",
-      latitude: lat,
-      longitude: lng
+    // 2) Lấy items + Product
+    const items = await CartItem.findAll({
+      where: { cartId: cid },
+      include: [{ model: Product, as: "product", attributes: ["id", "storeId", "price", "name"] }],
     });
 
-    console.log(`✅ Đã lưu order với tọa độ: latitude=${lat}, longitude=${lng}`);
+    if (items.length === 0) return res.status(400).json({ message: "Giỏ hàng trống" });
 
-    for (const item of items) {
-      await OrderItem.create({
-        orderId: order.id,
-        productId: item.productId,
-        productName: item.productName,
-        productPrice: item.productPrice,
-        quantity: item.quantity,
-      });
+    const storeIds = [...new Set(items.map(i => Number(i.product?.storeId)))];
+    if (storeIds.includes(NaN)) return res.status(400).json({ message: "Thiếu product.storeId trong giỏ" });
+    if (storeIds.length !== 1) {
+      return res.status(400).json({ message: "Giỏ hàng chứa sản phẩm từ nhiều cửa hàng" });
     }
+    const storeId = storeIds[0];
 
-    await CartItem.destroy({ where: { cartId } });
-    await cart.destroy();
+    const totalPrice = items.reduce((sum, i) => sum + Number(i.quantity) * Number(i.product?.price || 0), 0);
 
-    res.status(201).json({ orderId: order.id, total: order.totalPrice, latitude: lat, longitude: lng });
+    // 5) Tạo order
+    const order = await Order.create({
+      userId,
+      storeId,
+      totalPrice,
+      note,
+      deliveryAddress,
+      contactPhone,
+      latitude,
+      longitude,
+      status: "pending",
+    });
+
+    // 6) Tạo order items
+    await Promise.all(items.map(i =>
+      OrderItem.create({
+        orderId: order.id,
+        productId: i.productId,
+        quantity: i.quantity,
+        price: i.product.price,
+      })
+    ));
+
+    // 7) (Tuỳ chọn) Xoá giỏ sau khi tạo đơn
+    // await CartItem.destroy({ where: { cartId: cid } });
+
+    console.log("✅ Created order", { orderId: order.id, storeId, totalPrice, items: items.length });
+    return res.status(201).json({ orderId: order.id });
   } catch (err) {
-    console.error("❌ Lỗi khi tạo đơn:", err);
-    res.status(500).json({ message: "Lỗi server" });
+    console.error("❌ createOrder error:", err);
+    return res.status(500).json({ message: "Lỗi server khi tạo đơn", detail: err.message });
   }
 };
-
-
 
 
 
