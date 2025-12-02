@@ -13,7 +13,8 @@ export default function Drone() {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({ name: "", speed: "" });
   const [assignDroneId, setAssignDroneId] = useState(null);
-  const [selectedStore, setSelectedStore] = useState("");
+  // Sửa: selectedStore nên là number hoặc null
+  const [selectedStore, setSelectedStore] = useState(null);
 
   useEffect(() => {
     fetchDrones();
@@ -23,7 +24,7 @@ export default function Drone() {
   const fetchDrones = async () => {
     try {
       const res = await axios.get(API_URL);
-      setDrones(res.data.data || []); // giữ nguyên vì drone API trả { data: [...] }
+      setDrones(res.data.data || []);
     } catch (err) {
       console.error("❌ Lỗi fetch drone:", err);
       setDrones([]);
@@ -33,14 +34,17 @@ export default function Drone() {
   const fetchStores = async () => {
     try {
       const res = await axios.get(STORES_API);
-      console.log("Stores API response:", res.data); // debug xem backend trả gì
-      setStores(res.data || []); // nếu controller trả mảng thẳng thì dùng res.data
+      // ✅ Sửa lại để xử lý đúng cấu trúc dữ liệu trả về
+      // API có thể trả về mảng trực tiếp hoặc object { data: [...] }
+      const storeData = Array.isArray(res.data) ? res.data : (res.data.data || []);
+      setStores(storeData);
     } catch (err) {
       console.error("❌ Lỗi fetch stores:", err);
       setStores([]);
     }
   };
 
+  // ... (handleChange, handleSubmit, handleDelete không đổi) ...
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm(f => ({ ...f, [name]: value }));
@@ -74,25 +78,25 @@ export default function Drone() {
     }
   };
 
+
   const openAssign = (droneId) => {
+    const droneToAssign = drones.find(d => d.id === droneId);
     setAssignDroneId(droneId);
-    setSelectedStore("");
+    // ✅ Gán sẵn cửa hàng hiện tại của drone vào modal
+    setSelectedStore(droneToAssign?.storeId || null);
   };
 
-const handleAssign = async () => {
-  if (!selectedStore) return alert("Chọn cửa hàng để phân phối!");
-  try {
-    await axios.post(`${API_URL}/${assignDroneId}/assign`, { storeId: selectedStore });
-    fetchDrones();
-    setAssignDroneId(null);
-    setSelectedStore(""); 
-  } catch (err) {
-    console.error("❌ Lỗi phân phối drone:", err);
-    alert("Phân phối thất bại!");
-  }
-};
-
-
+  const handleAssign = async () => {
+    if (!selectedStore) return alert("Chọn cửa hàng để phân phối!");
+    try {
+      await axios.post(`${API_URL}/${assignDroneId}/assign`, { storeId: selectedStore });
+      fetchDrones(); // Tải lại danh sách drone để cập nhật UI
+      setAssignDroneId(null);
+    } catch (err) {
+      console.error("❌ Lỗi phân phối drone:", err.response?.data || err.message);
+      alert(err.response?.data?.message || "Phân phối thất bại!");
+    }
+  };
 
   const openAdd = () => {
     setForm({ name: "", speed: "" });
@@ -113,8 +117,9 @@ const handleAssign = async () => {
             <tr>
               <th>STT</th>
               <th>Tên</th>
-              <th>Tốc độ</th>
+              <th>Tốc độ (km/h)</th>
               <th>Status</th>
+              <th>Cửa hàng</th> {/* ✅ Thêm cột cửa hàng */}
               <th>Hành động</th>
             </tr>
           </thead>
@@ -125,10 +130,15 @@ const handleAssign = async () => {
                 <td>{d.name}</td>
                 <td>{d.speed}</td>
                 <td>{d.status}</td>
+                {/* ✅ Hiển thị tên cửa hàng */}
+                <td>{stores.find(s => s.id === d.storeId)?.name || 'Chưa phân phối'}</td>
                 <td>
                   <button className="delete-btn" onClick={() => handleDelete(d.id)}>Xoá</button>
-                  {d.status === "WAITING" && (
-                    <button className="assign-btn" onClick={() => openAssign(d.id)}>🚀 Phân phối</button>
+                  {/* ✅ Cho phép phân phối/chuyển cửa hàng khi không đang bay */}
+                  {d.status !== "FLYING" && (
+                    <button className="assign-btn" onClick={() => openAssign(d.id)}>
+                      {d.storeId ? 'Chuyển cửa hàng' : '🚀 Phân phối'}
+                    </button>
                   )}
                 </td>
               </tr>
@@ -136,7 +146,7 @@ const handleAssign = async () => {
           </tbody>
         </table>
 
-        {/* Modal tạo drone */}
+        {/* ... (Modal tạo drone không đổi) ... */}
         {showModal && (
           <div className="modal-overlay">
             <div className="modal-box">
@@ -159,7 +169,8 @@ const handleAssign = async () => {
             <div className="modal-box">
               <h3>Phân phối Drone</h3>
               <label>Chọn cửa hàng</label>
-              <select value={selectedStore} onChange={e => setSelectedStore(e.target.value)}>
+              {/* ✅ Sửa select để xử lý number */}
+              <select value={selectedStore || ''} onChange={e => setSelectedStore(Number(e.target.value) || null)}>
                 <option value="">-- Chọn cửa hàng --</option>
                 {stores.map(s => (
                   <option key={s.id} value={s.id}>{s.name}</option>

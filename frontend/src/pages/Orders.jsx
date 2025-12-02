@@ -36,36 +36,26 @@ const PopupMap = ({ storeLat, storeLon, userLat, userLon, status, droneSpeed, or
 const speed = (Number(droneSpeed) || 30) * 1000; // bay nhanh gấp đôi
 
   useEffect(() => {
-    if (status !== "delivering") return;
-
-    const totalDistance = haversineDistance(storeLat, storeLon, userLat, userLon); // km
-    const totalTimeMs = (totalDistance / speed) * 3600 * 1000; // ms
-    const startTime = Date.now();
-
-    const timer = setInterval(async () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / totalTimeMs, 1);
-
-      const newLat = storeLat + (userLat - storeLat) * progress;
-      const newLon = storeLon + (userLon - storeLon) * progress;
-      setDronePos([newLat, newLon]);
-
-      if (progress >= 1) {
-        clearInterval(timer);
-        try {
-          // Update order status
-          await axios.put(`${API_URL}/${orderId}`, { status: "success" });
-          // Update drone status → waiting
-          await axios.put(`${DRONE_API}/delivery/${orderId}/status`, { status: "waiting" });
-          window.location.reload();
-        } catch (err) {
-          console.error("❌ Lỗi cập nhật order/drone:", err);
+    let timer;
+    const poll = async () => {
+      try {
+        const res = await axios.get(`${DRONE_API}/delivery/progress/${orderId}`);
+        const { status: s, progress, position } = res.data || {};
+        if (position?.lat != null && position?.lon != null) {
+          setDronePos([position.lat, position.lon]);
         }
+        if (progress >= 1 || s === "done") {
+          clearInterval(timer);
+        }
+      } catch (e) {
+        console.error("❌ Lỗi progress:", e);
       }
-    }, 100);
+    };
 
+    poll();
+    timer = setInterval(poll, 1500);
     return () => clearInterval(timer);
-  }, [status, speed, storeLat, storeLon, userLat, userLon, orderId]);
+  }, [orderId]);
 
   const distance = haversineDistance(storeLat, storeLon, userLat, userLon);
   const estMinutes = (distance / speed) * 60;
@@ -100,6 +90,9 @@ const Orders = () => {
   const [availableDrones, setAvailableDrones] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
 
+  // ✅ 1. Thêm state để lưu tất cả drone của cửa hàng
+  const [storeDrones, setStoreDrones] = useState([]);
+
   const [showMapPopup, setShowMapPopup] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [storeLat, setStoreLat] = useState(null);
@@ -114,16 +107,30 @@ const Orders = () => {
   const fetchStoreOfUser = async () => {
     try {
       const res = await axios.get(STORE_API);
-      const myStore = res.data.find(s => Number(s.ownerId) === Number(userId));
+      const stores = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      const myStore = stores.find((s) => Number(s.ownerId ?? s.owner_id) === Number(userId));
       if (!myStore) {
-        console.warn("Không tìm thấy cửa hàng của user:", userId);
+        console.warn("Không tìm thấy cửa hàng của user:", userId, stores);
         return;
       }
       setStoreId(myStore.id);
-      // Sau khi có storeId, lấy orders
       fetchOrders(myStore.id);
+      // ✅ 2. Gọi hàm lấy tất cả drone của cửa hàng
+      fetchAllStoreDrones(myStore.id);
     } catch (err) {
       console.error("❌ Lỗi lấy cửa hàng của user:", err);
+    }
+  };
+
+  // ✅ 3. Hàm mới để lấy tất cả drone của cửa hàng
+  const fetchAllStoreDrones = async (sid) => {
+    try {
+      const res = await axios.get(`${DRONE_API}/drone-delivery`);
+      const allDrones = res.data.data || res.data || [];
+      const filteredDrones = allDrones.filter(d => Number(d.storeId) === Number(sid));
+      setStoreDrones(filteredDrones);
+    } catch (err) {
+      console.error("❌ Lỗi lấy danh sách drone của cửa hàng:", err);
     }
   };
 
@@ -148,13 +155,15 @@ const Orders = () => {
   const handleAction = async (id, nextStatus) => {
     if (nextStatus === "delivering") {
       setSelectedOrderId(id);
+      // ✅ Gọi hàm lấy drone rảnh (đã được sửa)
       fetchAvailableDrones();
       setShowDronePopup(true);
       return;
     }
     try {
       await axios.put(`${API_URL}/${id}`, { status: nextStatus });
-      fetchOrders();
+      // ✅ truyền lại storeId để lọc đúng
+      if (storeId) await fetchOrders(storeId);
       alert("Cập nhật thành công!");
     } catch (err) {
       console.error("❌ Lỗi cập nhật:", err);
@@ -162,23 +171,32 @@ const Orders = () => {
   };
 
   const fetchAvailableDrones = async () => {
+    // ✅ 4. Sửa lại để chỉ lấy drone rảnh của cửa hàng hiện tại
+    if (!storeId) return; // Không gọi API nếu chưa có storeId
+
     try {
-      const res = await axios.get(`${DRONE_API}/drones/waiting`);
-      setAvailableDrones(res.data.data);
+      const res = await axios.get(`${DRONE_API}/drone-delivery/waiting`, {
+        params: { storeId: storeId } // Gửi storeId làm query param
+      });
+      setAvailableDrones(res.data.data || res.data || []);
     } catch (err) {
       console.error("❌ Lỗi lấy drone:", err);
+      setAvailableDrones([]);
     }
   };
 
   const assignDroneToOrder = async (droneId) => {
     try {
-      await axios.post(`${DRONE_API}/drones/assign`, { orderId: selectedOrderId, droneId });
-      await axios.put(`${API_URL}/${selectedOrderId}`, { status: "delivering" });
+      // Gọi assign (backend tự set order -> delivering, drone -> FLYING)
+      await axios.post(`${DRONE_API}/delivery/assign`, { orderId: selectedOrderId, droneId });
       alert("🚁 Drone đã được gán, đơn hàng đang vận chuyển!");
       setShowDronePopup(false);
-      fetchOrders();
+      if (storeId) {
+        fetchOrders(storeId); // Tải lại danh sách đơn hàng để cập nhật trạng thái
+      }
     } catch (err) {
       console.error("❌ Lỗi gán drone:", err);
+      alert(err.response?.data?.message || "Gán drone thất bại!");
     }
   };
 
@@ -242,10 +260,6 @@ const Orders = () => {
 
         {/* Overview */}
         <div className="overview-container">
-          {/*
-            Chỉ tính theo đơn của cửa hàng đang đăng nhập
-            Dùng displayOrders (đã lọc theo storeId) hoặc lọc lại từ orders
-          */}
           {(() => {
             const base = orders.filter(o => Number(o.storeId) === Number(storeId));
             const total = base.length;
@@ -258,6 +272,8 @@ const Orders = () => {
                 <div className="overview-box"><h3>{total}</h3><p>Tổng đơn hàng</p></div>
                 <div className="overview-box"><h3>{processing}</h3><p>Đang xử lý</p></div>
                 <div className="overview-box"><h3>{success}</h3><p>Hoàn thành</p></div>
+                {/* ✅ 5. Thêm box hiển thị tổng số drone */}
+                <div className="overview-box"><h3>{storeDrones.length}</h3><p>Tổng số Drone</p></div>
                 <div className="overview-box">
                   <h3>{revenue.toLocaleString("vi-VN")} ₫</h3>
                   <p>Doanh thu</p>

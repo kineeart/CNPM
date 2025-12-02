@@ -63,44 +63,26 @@ const PopupMap = ({
   useEffect(() => {
     if (status !== "delivering") return;
 
-    const totalDistance = haversineDistance(storeLat, storeLon, userLat, userLon);
-
-    const speedMultiplier = 1000;
-    const adjustedSpeed = speed * speedMultiplier;
-
-    const totalTimeMs = (totalDistance / adjustedSpeed) * 3600 * 1000;
-    const startTime = Date.now();
-
-    const timer = setInterval(async () => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / totalTimeMs, 1);
-
-      const newLat = storeLat + (userLat - storeLat) * progress;
-      const newLon = storeLon + (userLon - storeLon) * progress;
-
-      setDronePos([newLat, newLon]);
-
-      if (progress >= 1) {
-        clearInterval(timer);
-
-        try {
-          await axios.put(`${BACKEND_URL}/orders/${orderId}`, {
-            status: "success",
-          });
-
-          await axios.put(`${BACKEND_URL}/delivery/${orderId}/status`, {
-            status: "waiting",
-          });
-
-          window.location.reload();
-        } catch (err) {
-          console.error("Lỗi cập nhật order/drone:", err);
+    let timer;
+    const poll = async () => {
+      try {
+        const res = await axios.get(`${BACKEND_URL}/delivery/progress/${orderId}`);
+        const { status: s, progress, position } = res.data || {};
+        if (position?.lat != null && position?.lon != null) {
+          setDronePos([position.lat, position.lon]);
         }
+        if (progress >= 1 || s === "done") {
+          clearInterval(timer);
+        }
+      } catch (err) {
+        console.error("Lỗi cập nhật tiến trình drone:", err);
       }
-    }, 100);
+    };
 
+    poll();
+    timer = setInterval(poll, 1500);
     return () => clearInterval(timer);
-  }, [status, speed, storeLat, storeLon, userLat, userLon]);
+  }, [status, orderId]);
 
   const distance = haversineDistance(storeLat, storeLon, userLat, userLon);
   const estMinutes = (distance / 100) * 60;
