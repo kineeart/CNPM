@@ -6,10 +6,9 @@ const SidebarBigAdmin = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { label: "Tổng quan", path: "/dashboard" },
+    { label: "Tổng quan", path: "/dashboard-bigadmin" },
     { label: "Người dùng", path: "/customers" },
     { label: "Đơn hàng", path: "/orders" },
-    { label: "Sản phẩm", path: "/products" },
     { label: "Nhà hàng", path: "/stores" },
     { label: "Drone", path: "/drone" },
 
