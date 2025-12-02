@@ -7,11 +7,11 @@ import { Store } from "../models/store.model.js";
 const router = express.Router();
 
 const haversine = (lat1, lon1, lat2, lon2) => {
-    const R = 6371, toRad = d => (d * Math.PI) / 180;
-    const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
+  const R = 6371, toRad = d => (d * Math.PI)/180;
+  const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+};  
 
 // =======================
 // GET tất cả drone
@@ -139,9 +139,8 @@ router.post("/assign", async (req, res) => {
     if (drone.status !== 'WAITING') return res.status(400).json({ message: "Drone không rảnh" });
     if (!order.Store) return res.status(400).json({ message: "Đơn hàng không có thông tin cửa hàng" });
 
-    const distanceKm = haversine(order.Store.latitude, order.Store.longitude, order.latitude, order.longitude);
-    const speedKmH = Number(drone.speed) > 0 ? Number(drone.speed) : 30;
-    const etaMinutes = Math.max(Math.ceil((distanceKm / speedKmH) * 60), 1);
+      const distanceKm = haversine(order.Store.latitude, order.Store.longitude, order.latitude, order.longitude);
+    const etaMinutes = Math.max(Math.ceil(distanceKm / (drone.speed || 30) * 30), 1);
 
     await drone.update({ status: "FLYING", orderId: orderId, estimatedTime: etaMinutes });
     await order.update({ status: "delivering" });
@@ -154,26 +153,32 @@ router.post("/assign", async (req, res) => {
 });
 
 // GET /api/delivery/progress/:orderId -> Lấy tiến trình giao hàng
-router.get("/progress/:orderId", async (req, res) => {
+router.get("/delivery/progress/:orderId", async (req, res) => {
   try {
     const { orderId } = req.params;
     const drone = await DroneDelivery.findOne({ where: { orderId } });
     const order = await Order.findByPk(orderId, { include: [{ model: Store, as: "Store" }] });
 
-    if (!order || !order.Store) return res.status(404).json({ message: "Không tìm thấy đơn/cửa hàng" });
+    if (!order || !order.Store) {
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng hoặc thông tin cửa hàng" });
+    }
+
+    // Nếu không có drone, có thể đơn hàng chưa được giao hoặc đã hoàn thành
     if (!drone) {
-      const done = order.status === "success";
+      const isDone = order.status === "success";
       return res.json({
-        status: done ? "done" : "idle",
-        progress: done ? 1 : 0,
+        status: isDone ? "done" : "idle",
+        progress: isDone ? 1 : 0,
         position: { lat: order.Store.latitude, lon: order.Store.longitude }
       });
     }
 
+    // Nếu drone không đang bay
     if (drone.status !== "FLYING") {
       return res.json({ status: drone.status, progress: 0, position: { lat: order.Store.latitude, lon: order.Store.longitude } });
     }
 
+    // Tính toán tiến trình và vị trí
     const startedAt = new Date(drone.updatedAt).getTime();
     const etaMs = Number(drone.estimatedTime || 0) * 60 * 1000;
     const now = Date.now();
@@ -190,7 +195,7 @@ router.get("/progress/:orderId", async (req, res) => {
       position: { lat: curLat, lon: curLon }
     });
   } catch (err) {
-    console.error("❌ Lỗi progress:", err);
+    console.error("❌ Lỗi lấy tiến trình giao hàng:", err);
     res.status(500).json({ message: "Lỗi server" });
   }
 });

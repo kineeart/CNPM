@@ -112,39 +112,43 @@ export default function Drone() {
           <button className="add-btn" onClick={openAdd}>➕ Thêm Drone</button>
         </div>
 
-        <table className="drone-table">
-          <thead>
-            <tr>
-              <th>STT</th>
-              <th>Tên</th>
-              <th>Tốc độ (km/h)</th>
-              <th>Status</th>
-              <th>Cửa hàng</th> {/* ✅ Thêm cột cửa hàng */}
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {drones.map((d, idx) => (
-              <tr key={d.id}>
-                <td>{idx + 1}</td>
-                <td>{d.name}</td>
-                <td>{d.speed}</td>
-                <td>{d.status}</td>
-                {/* ✅ Hiển thị tên cửa hàng */}
-                <td>{stores.find(s => s.id === d.storeId)?.name || 'Chưa phân phối'}</td>
-                <td>
-                  <button className="delete-btn" onClick={() => handleDelete(d.id)}>Xoá</button>
-                  {/* ✅ Cho phép phân phối/chuyển cửa hàng khi không đang bay */}
-                  {d.status !== "FLYING" && (
-                    <button className="assign-btn" onClick={() => openAssign(d.id)}>
-                      {d.storeId ? 'Chuyển cửa hàng' : '🚀 Phân phối'}
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <table className="drone-table">
+  <thead>
+    <tr>
+      <th>STT</th>
+      <th>Tên</th>
+      <th>Tốc độ</th>
+      <th>Status</th>
+      <th>Cửa hàng</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {drones.map((d, idx) => (
+      <tr key={d.id}>
+        <td>{idx + 1}</td>
+        <td>{d.name}</td>
+        <td>{d.speed}</td>
+        <td>{d.status}</td>
+        <td>{stores.find(s => s.id === d.storeId)?.name || "Chưa phân phối"}</td>
+
+        <td>
+          <button className="delete-btn" onClick={() => handleDelete(d.id)}>
+            Xoá
+          </button>
+
+          {d.status !== "FLYING" && (
+            <button className="assign-btn" onClick={() => openAssign(d.id)}>
+              {d.storeId ? "Chuyển cửa hàng" : "Phân phối"}
+            </button>
+          )}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
 
         {/* ... (Modal tạo drone không đổi) ... */}
         {showModal && (

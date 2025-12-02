@@ -7,7 +7,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
 const API_URL = import.meta.env.VITE_BACKEND_URL + "/orders";
-const DRONE_API = import.meta.env.VITE_BACKEND_URL;
+const DRONE_API = import.meta.env.VITE_BACKEND_URL ; // URL gốc cho API
 const STORE_API = import.meta.env.VITE_BACKEND_URL + "/stores";
 
 const user = JSON.parse(localStorage.getItem("user"));
@@ -25,61 +25,94 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 };
 
+const fetchStore = async (storeId) => {
+  try {
+    const res = await axios.get(`${STORE_API}/${storeId}`);
+    return res.data;
+  } catch (err) {
+    console.error("❌ Lỗi fetchStore:", err);
+    return null;
+  }
+};
+
 // ICONS
 const storeIcon = new L.Icon({ iconUrl: "/icons/store.png", iconSize: [35, 35], iconAnchor: [17, 35] });
 const userIcon = new L.Icon({ iconUrl: "/icons/user.png", iconSize: [35, 35], iconAnchor: [17, 35] });
 const droneIcon = new L.Icon({ iconUrl: "/icons/drone.png", iconSize: [40, 40], iconAnchor: [20, 20] });
 
 // Popup Map & Drone Animation
-const PopupMap = ({ storeLat, storeLon, userLat, userLon, status, droneSpeed, orderId, onClose }) => {
-  const [dronePos, setDronePos] = useState([storeLat, storeLon]);
-const speed = (Number(droneSpeed) || 30) * 1000; // bay nhanh gấp đôi
+// Popup Map & Drone Smooth Animation
+const PopupMap = ({ storeLat, storeLon, userLat, userLon, orderId }) => {
+  const [dronePos, setDronePos] = useState([storeLat, storeLon]);       // vị trí đang hiển thị (mượt)
+  const [targetPos, setTargetPos] = useState([storeLat, storeLon]);      // vị trí API trả về
 
+  // 🔄 Poll dữ liệu mới từ backend mỗi 1.5s
   useEffect(() => {
-    let timer;
     const poll = async () => {
       try {
         const res = await axios.get(`${DRONE_API}/delivery/progress/${orderId}`);
-        const { status: s, progress, position } = res.data || {};
-        if (position?.lat != null && position?.lon != null) {
-          setDronePos([position.lat, position.lon]);
-        }
-        if (progress >= 1 || s === "done") {
-          clearInterval(timer);
+        const pos = res.data.position;
+
+        if (pos?.lat != null && pos?.lon != null) {
+          setTargetPos([pos.lat, pos.lon]);
         }
       } catch (e) {
-        console.error("❌ Lỗi progress:", e);
+        console.error("Lỗi poll:", e);
       }
     };
 
     poll();
-    timer = setInterval(poll, 1500);
+    const timer = setInterval(poll, 1500);
     return () => clearInterval(timer);
   }, [orderId]);
 
-  const distance = haversineDistance(storeLat, storeLon, userLat, userLon);
-  const estMinutes = (distance / speed) * 60;
+  // 🎬 Animation mượt bằng requestAnimationFrame
+  useEffect(() => {
+    let frame;
+
+    const animate = () => {
+      setDronePos(prev => {
+        const [curLat, curLon] = prev;
+        const [tarLat, tarLon] = targetPos;
+
+        // Nếu khoảng cách rất nhỏ → coi như đã đến
+        const dist = Math.hypot(tarLat - curLat, tarLon - curLon);
+        if (dist < 0.00001) return prev;
+
+        // Speed = 5% mỗi frame -> có thể chỉnh nhanh/chậm
+        const speed = 0.05;
+
+        const newLat = curLat + (tarLat - curLat) * speed;
+        const newLon = curLon + (tarLon - curLon) * speed;
+
+        return [newLat, newLon];
+      });
+
+      frame = requestAnimationFrame(animate);
+    };
+
+    frame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frame);
+  }, [targetPos]);
 
   return (
     <div className="popup-overlay">
       <div className="popup-box">
-        <button className="close-btn" onClick={onClose}>✖</button>
-        <h3>🚁 Lộ trình Drone</h3>
-        <MapContainer center={[storeLat, storeLon]} zoom={14} style={{ height: "350px", width: "100%", borderRadius: 10 }}>
+        <MapContainer center={dronePos} zoom={14} style={{ height: "350px", width: "100%" }}>
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={[storeLat, storeLon]} icon={storeIcon}><Popup>Store</Popup></Marker>
-          <Marker position={[userLat, userLon]} icon={userIcon}><Popup>Khách hàng</Popup></Marker>
-          <Marker position={dronePos} icon={droneIcon}><Popup>Drone đang bay 🚀</Popup></Marker>
+
+          <Marker position={[storeLat, storeLon]} icon={storeIcon} />
+          <Marker position={[userLat, userLon]} icon={userIcon} />
+          <Marker position={dronePos} icon={droneIcon} />
+
           <Polyline positions={[[storeLat, storeLon], [userLat, userLon]]} color="blue" />
         </MapContainer>
-        <div style={{ marginTop: 10 }}>
-          <p>📏 Khoảng cách: {distance.toFixed(2)} km</p>
-          <p>⏱️ Thời gian dự kiến: {estMinutes.toFixed(1)} phút</p>
-        </div>
       </div>
     </div>
   );
 };
+
+
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);

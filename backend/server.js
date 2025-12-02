@@ -46,9 +46,10 @@ app.use("/api/dashboard", dashboardRouter);
 app.use("/api/zalopay", zalopayRoutes);
 app.use("/api/address", addressRoutes);
 app.use("/api/geocode", geocodeRouter);
-  
+  app.use("/api/drone-delivery", droneDeliveryRoutes);
+
 // 🚀 DÙNG ĐÚNG 1 LẦN
-app.use("/api/drone-delivery", droneDeliveryRoutes);
+app.use("/api", droneDeliveryRoutes);
 
 // =================================
 app.get("/ping", (req, res) => res.json({ message: "🏓 Server sống!" }));
