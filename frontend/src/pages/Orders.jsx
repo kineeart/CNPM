@@ -6,18 +6,12 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet"
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL+"/orders";
+const API_URL = import.meta.env.VITE_BACKEND_URL + "/orders";
 const DRONE_API = import.meta.env.VITE_BACKEND_URL;
+const STORE_API = import.meta.env.VITE_BACKEND_URL + "/stores";
 
-const fetchStore = async (storeId) => {
-  try {
-    const res = await axios.get(`http://10.112.28.37:3000/api/stores/${storeId}`);
-    return res.data;
-  } catch (err) {
-    console.error("❌ Lỗi lấy thông tin store:", err);
-    return null;
-  }
-};
+const user = JSON.parse(localStorage.getItem("user"));
+const userId = user?.id ? Number(user.id) : null;
 
 // Haversine distance (km)
 const haversineDistance = (lat1, lon1, lat2, lon2) => {
@@ -101,6 +95,7 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [displayOrders, setDisplayOrders] = useState([]);
   const [filterStatus, setFilterStatus] = useState("ALL");
+  const [storeId, setStoreId] = useState(null);
   const [showDronePopup, setShowDronePopup] = useState(false);
   const [availableDrones, setAvailableDrones] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
@@ -112,13 +107,33 @@ const Orders = () => {
   const [userLat, setUserLat] = useState(null);
   const [userLon, setUserLon] = useState(null);
 
-  useEffect(() => { fetchOrders(); }, []);
+  useEffect(() => { 
+    fetchStoreOfUser(); 
+  }, []);
 
-  const fetchOrders = async () => {
+  const fetchStoreOfUser = async () => {
+    try {
+      const res = await axios.get(STORE_API);
+      const myStore = res.data.find(s => Number(s.ownerId) === Number(userId));
+      if (!myStore) {
+        console.warn("Không tìm thấy cửa hàng của user:", userId);
+        return;
+      }
+      setStoreId(myStore.id);
+      // Sau khi có storeId, lấy orders
+      fetchOrders(myStore.id);
+    } catch (err) {
+      console.error("❌ Lỗi lấy cửa hàng của user:", err);
+    }
+  };
+
+  const fetchOrders = async (sid) => {
     try {
       const res = await axios.get(API_URL);
       setOrders(res.data);
-      setDisplayOrders(res.data);
+      // Lọc theo storeId cửa hàng của user
+      const filtered = res.data.filter(o => Number(o.storeId) === Number(sid));
+      setDisplayOrders(filtered);
     } catch (err) {
       console.error("❌ Lỗi lấy danh sách đơn:", err);
     }
@@ -126,7 +141,8 @@ const Orders = () => {
 
   const filterByStatus = (status) => {
     setFilterStatus(status);
-    setDisplayOrders(status === "ALL" ? orders : orders.filter(o => o.status === status));
+    const base = orders.filter(o => Number(o.storeId) === Number(storeId));
+    setDisplayOrders(status === "ALL" ? base : base.filter(o => o.status === status));
   };
 
   const handleAction = async (id, nextStatus) => {
@@ -226,13 +242,29 @@ const Orders = () => {
 
         {/* Overview */}
         <div className="overview-container">
-          <div className="overview-box"><h3>{orders.length}</h3><p>Tổng đơn hàng</p></div>
-          <div className="overview-box"><h3>{orders.filter(o => o.status === "processing").length}</h3><p>Đang xử lý</p></div>
-          <div className="overview-box"><h3>{orders.filter(o => o.status === "success").length}</h3><p>Hoàn thành</p></div>
-          <div className="overview-box">
-            <h3>{orders.reduce((sum,o)=>sum+(o.status==="success"?o.totalPrice:0),0).toLocaleString("vi-VN")} ₫</h3>
-            <p>Doanh thu</p>
-          </div>
+          {/*
+            Chỉ tính theo đơn của cửa hàng đang đăng nhập
+            Dùng displayOrders (đã lọc theo storeId) hoặc lọc lại từ orders
+          */}
+          {(() => {
+            const base = orders.filter(o => Number(o.storeId) === Number(storeId));
+            const total = base.length;
+            const processing = base.filter(o => o.status === "processing").length;
+            const success = base.filter(o => o.status === "success").length;
+            const revenue = base.reduce((sum, o) => sum + (o.status === "success" ? Number(o.totalPrice || 0) : 0), 0);
+
+            return (
+              <>
+                <div className="overview-box"><h3>{total}</h3><p>Tổng đơn hàng</p></div>
+                <div className="overview-box"><h3>{processing}</h3><p>Đang xử lý</p></div>
+                <div className="overview-box"><h3>{success}</h3><p>Hoàn thành</p></div>
+                <div className="overview-box">
+                  <h3>{revenue.toLocaleString("vi-VN")} ₫</h3>
+                  <p>Doanh thu</p>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* Filter */}
