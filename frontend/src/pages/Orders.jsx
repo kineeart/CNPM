@@ -188,7 +188,7 @@ const Orders = () => {
   const assignDroneToOrder = async (droneId) => {
     try {
       // Gọi assign (backend tự set order -> delivering, drone -> FLYING)
-      await axios.post(`${DRONE_API}/delivery/assign`, { orderId: selectedOrderId, droneId });
+      await axios.post(`${DRONE_API}/drone-delivery/assign`, { orderId: selectedOrderId, droneId });
       alert("🚁 Drone đã được gán, đơn hàng đang vận chuyển!");
       setShowDronePopup(false);
       if (storeId) {
