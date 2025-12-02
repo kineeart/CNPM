@@ -26,6 +26,7 @@ import Drone from "./pages/Drone";
 import DashboardBigAdmin from "./pages/DashboardBigAdmin";
 import OrderBigAdmin from "./pages/OrderBigAdmin";
 import ZalopayTest from "./pages/Zalopaytest";
+import Footer from "./pages/Footer"; // ✅ Thêm dòng import này
 
 // Backend URL
 export const BACKEND_URL =
@@ -34,34 +35,41 @@ export const BACKEND_URL =
 function App() {
   return (
     <Router>
-      <Routes>
-        {/* ==== AUTH ==== */}
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+      <div className="app-container">
+        {/* Navbar hoặc Header của bạn có thể ở đây */}
 
-        {/* ==== USER ==== */}
-        <Route path="/home" element={<Home />} />
-        <Route path="/store/:id" element={<StoreDetail />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/my-orders" element={<CustomerOrder />} />
-        <Route path="/notifi" element={<Notification />} />
+        <main className="main-content">
+          <Routes>
+            {/* ==== AUTH ==== */}
+            <Route path="/" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-        {/* ==== STORE ADMIN ==== */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/customers" element={<Customers />} />
-        <Route path="/orders" element={<Orders />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/stores" element={<Store />} />
-        <Route path="/drone" element={<Drone />} />
-        <Route path="/zalopay-test" element={<ZalopayTest />} />
+            {/* ==== USER ==== */}
+            <Route path="/home" element={<Home />} />
+            <Route path="/store/:id" element={<StoreDetail />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/my-orders" element={<CustomerOrder />} />
+            <Route path="/notifi" element={<Notification />} />
 
-        {/* ==== BIG ADMIN ==== */}
-        <Route path="/dashboard-bigadmin" element={<DashboardBigAdmin />} />
-        <Route path="/orders-bigadmin" element={<OrderBigAdmin />} />
+            {/* ==== STORE ADMIN ==== */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/customers" element={<Customers />} />
+            <Route path="/orders" element={<Orders />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/stores" element={<Store />} />
+            <Route path="/drone" element={<Drone />} />
+            <Route path="/zalopay-test" element={<ZalopayTest />} />
 
-      </Routes>
+            {/* ==== BIG ADMIN ==== */}
+            <Route path="/dashboard-bigadmin" element={<DashboardBigAdmin />} />
+            <Route path="/orders-bigadmin" element={<OrderBigAdmin />} />
+          </Routes>
+        </main>
+
+        <Footer /> {/* ✅ 2. Thêm Footer component vào đây */}
+      </div>
     </Router>
   );
 }

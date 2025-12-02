@@ -18,10 +18,10 @@ export const registerUser = async (req, res) => {
     const user = await User.create({
       name,
       email,
-      password,
+      password, // Lưu ý: Mật khẩu nên được mã hóa (hash)
       phone,
-      role: "user",
-      status: "active",
+      role: "CUSTOMER", // ✅ Sửa lại cho khớp với ENUM trong model
+      status: "ACTIVE",   // ✅ Sửa lại cho khớp với ENUM trong model
     });
 
     res.status(201).json({ message: "Đăng ký thành công", user });

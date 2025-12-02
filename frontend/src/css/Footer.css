@@ -1,0 +1,94 @@
+/* Footer.css */
+
+.main-footer {
+    background-color: #2c3e50; /* Màu nền tối cho Footer */
+    color: #ecf0f1; /* Màu chữ sáng */
+    padding: 40px 20px;
+    font-size: 16px;
+    border-top: 5px solid #e74c3c; /* Đường viền màu nổi bật */
+}
+
+.footer-content-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap; /* Cho phép các phần tử xuống dòng trên màn hình nhỏ */
+    gap: 30px;
+    padding-bottom: 20px;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 250px; /* Giới hạn chiều rộng tối thiểu */
+}
+
+.footer-section h3 {
+    color: #f1c40f; /* Màu tiêu đề nổi bật */
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 5px;
+    display: inline-block;
+}
+
+.footer-section p {
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+/* Kiểu cho phần Liên kết nhanh */
+.footer-section.links ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section.links ul li {
+    margin-bottom: 8px;
+}
+
+.footer-section.links ul li a {
+    color: #ecf0f1;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section.links ul li a:hover {
+    color: #3498db; /* Hiệu ứng hover */
+}
+
+/* Kiểu cho phần Liên hệ */
+.footer-section.contact p {
+    display: flex;
+    align-items: center;
+}
+
+.footer-section.contact i {
+    margin-right: 10px;
+    color: #3498db;
+}
+
+/* Phần bản quyền */
+.footer-bottom {
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid #34495e;
+    font-size: 0.9em;
+    margin-top: 20px;
+}
+
+/* Điều chỉnh responsive cho màn hình nhỏ */
+@media (max-width: 768px) {
+    .footer-content-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .footer-section {
+        margin-bottom: 20px;
+    }
+    
+    .footer-section h3 {
+        border-bottom: none;
+    }
+}

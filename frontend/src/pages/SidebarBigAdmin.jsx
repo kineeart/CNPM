@@ -8,7 +8,6 @@ const SidebarBigAdmin = () => {
   const menuItems = [
     { label: "Tổng quan", path: "/dashboard-bigadmin" },
     { label: "Người dùng", path: "/customers" },
-    { label: "Đơn hàng", path: "/orders" },
     { label: "Nhà hàng", path: "/stores" },
     { label: "Drone", path: "/drone" },
 

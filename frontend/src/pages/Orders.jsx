@@ -43,10 +43,10 @@ const droneIcon = new L.Icon({ iconUrl: "/icons/drone.png", iconSize: [40, 40], 
 // Popup Map & Drone Animation
 // Popup Map & Drone Smooth Animation
 const PopupMap = ({ storeLat, storeLon, userLat, userLon, orderId }) => {
-  const [dronePos, setDronePos] = useState([storeLat, storeLon]);       // vị trí đang hiển thị (mượt)
-  const [targetPos, setTargetPos] = useState([storeLat, storeLon]);      // vị trí API trả về
+  const [dronePos, setDronePos] = useState([storeLat, storeLon]);     
+  const [targetPos, setTargetPos] = useState([storeLat, storeLon]);    
 
-  // 🔄 Poll dữ liệu mới từ backend mỗi 1.5s
+  // 🔄 Poll backend mỗi 1.5s
   useEffect(() => {
     const poll = async () => {
       try {
@@ -68,32 +68,23 @@ const PopupMap = ({ storeLat, storeLon, userLat, userLon, orderId }) => {
 
   // 🎬 Animation mượt bằng requestAnimationFrame
   useEffect(() => {
-    let frame;
+    let animationFrame;
 
     const animate = () => {
-      setDronePos(prev => {
-        const [curLat, curLon] = prev;
-        const [tarLat, tarLon] = targetPos;
+      const [lat, lon] = dronePos;
+      const [tLat, tLon] = targetPos;
 
-        // Nếu khoảng cách rất nhỏ → coi như đã đến
-        const dist = Math.hypot(tarLat - curLat, tarLon - curLon);
-        if (dist < 0.00001) return prev;
+      const newLat = lat + (tLat - lat) * 0.15;
+      const newLon = lon + (tLon - lon) * 0.15;
 
-        // Speed = 5% mỗi frame -> có thể chỉnh nhanh/chậm
-        const speed = 0.05;
-
-        const newLat = curLat + (tarLat - curLat) * speed;
-        const newLon = curLon + (tarLon - curLon) * speed;
-
-        return [newLat, newLon];
-      });
-
-      frame = requestAnimationFrame(animate);
+      setDronePos([newLat, newLon]);
+      animationFrame = requestAnimationFrame(animate);
     };
 
-    frame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frame);
-  }, [targetPos]);
+    animationFrame = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, [targetPos, dronePos]);
 
   return (
     <div className="popup-overlay">
@@ -111,6 +102,7 @@ const PopupMap = ({ storeLat, storeLon, userLat, userLon, orderId }) => {
     </div>
   );
 };
+
 
 
 
@@ -236,6 +228,15 @@ const Orders = () => {
   const showMap = async (order) => {
     const store = await fetchStore(order.storeId);
     if (!store) return;
+if (!store.latitude || !store.longitude) {
+  alert("Store chưa có tọa độ!");
+  return;
+}
+
+if (!order.latitude || !order.longitude) {
+  alert("Khách hàng chưa có tọa độ!");
+  return;
+}
 
     setStoreLat(store.latitude);
     setStoreLon(store.longitude);

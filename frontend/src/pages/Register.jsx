@@ -9,30 +9,37 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const [ward, setWard] = useState("");
-  const [district, setDistrict] = useState("");
-  const [province, setProvince] = useState("");
+  const [error, setError] = useState(""); // State để hiển thị lỗi
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); // Xóa lỗi cũ
+
+    // Kiểm tra SĐT ở frontend
+    const phoneRegex = /^(0[1-9])+([0-9]{8})\b/;
+    if (!phoneRegex.test(phone)) {
+      setError("Số điện thoại không hợp lệ. Phải có 10 số và bắt đầu bằng 0.");
+      return;
+    }
+
     try {
-      const res = await axios.post(`${BACKEND_URL}/users/register`, {
+      // ✅ Sửa lại URL cho đúng với backend
+      const res = await axios.post(`${BACKEND_URL}/auth/register`, {
         name,
         email,
         password,
         phone,
-        address,
-        ward,
-        district,
-        province,
       });
 
       console.log("Register Success:", res.data);
       alert("Đăng ký thành công!");
+      // Chuyển hướng về trang đăng nhập (tùy chọn)
+      // window.location.href = '/login';
     } catch (err) {
-      console.error("Register Error:", err);
-      alert("Đăng ký thất bại: " + (err.response?.data?.error || err.message));
+      const errorMessage = err.response?.data?.message || err.message;
+      console.error("Register Error:", errorMessage);
+      setError(errorMessage); // Hiển thị lỗi từ server
+      alert("Đăng ký thất bại: " + errorMessage);
     }
   };
 
@@ -44,11 +51,10 @@ export default function Register() {
         <input type="text" placeholder="Họ và tên" value={name} onChange={(e) => setName(e.target.value)} required />
         <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <input type="password" placeholder="Mật khẩu" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        <input type="text" placeholder="Số điện thoại" value={phone} onChange={(e) => setPhone(e.target.value)} required />
-        <input type="text" placeholder="Địa chỉ (số nhà, đường...)" value={address} onChange={(e) => setAddress(e.target.value)} required />
-        <input type="text" placeholder="Phường/Xã" value={ward} onChange={(e) => setWard(e.target.value)} required />
-        <input type="text" placeholder="Quận/Huyện" value={district} onChange={(e) => setDistrict(e.target.value)} required />
-        <input type="text" placeholder="Tỉnh/Thành phố" value={province} onChange={(e) => setProvince(e.target.value)} required />
+        <input type="tel" placeholder="Số điện thoại" value={phone} onChange={(e) => setPhone(e.target.value)} required />
+
+        {/* Hiển thị lỗi nếu có */}
+        {error && <p className="error-message">{error}</p>}
 
         <button type="submit">Đăng ký</button>
       </form>

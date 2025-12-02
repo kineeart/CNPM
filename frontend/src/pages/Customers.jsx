@@ -11,6 +11,9 @@ const Customers = () => {
   const [showForm, setShowForm] = useState(false);
   const [editUser, setEditUser] = useState(null);
 
+  // ✅ 1. Thêm state để quản lý và hiển thị lỗi
+  const [error, setError] = useState("");
+
   const initialFormData = {
     name: "",
     email: "",
@@ -45,6 +48,23 @@ const Customers = () => {
   };
 
   const handleSubmit = async () => {
+    // ✅ 2. Thêm logic validation
+    setError(""); // Xóa lỗi cũ
+
+    // Kiểm tra định dạng email
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Email không đúng định dạng.");
+      return;
+    }
+
+    // Kiểm tra định dạng số điện thoại (10 số, bắt đầu bằng 0)
+    const phoneRegex = /^(0[1-9])+([0-9]{8})\b/;
+    if (!phoneRegex.test(formData.phone)) {
+      setError("Số điện thoại không hợp lệ (phải có 10 số và bắt đầu bằng 0).");
+      return;
+    }
+
     try {
       if (editUser) {
         // Chỉ gửi những field có thể update
@@ -65,8 +85,10 @@ const Customers = () => {
       setFormData(initialFormData);
       fetchUsers();
     } catch (err) {
+      const errorMessage = err.response?.data?.message || "Có lỗi xảy ra.";
       console.error("Lỗi:", err);
-      alert("Có lỗi xảy ra. Kiểm tra console để biết chi tiết.");
+      setError(errorMessage); // Hiển thị lỗi từ server
+      alert(errorMessage);
     }
   };
 
@@ -94,12 +116,14 @@ const Customers = () => {
       district: u.district || "",
       province: u.province || ""
     });
+    setError(""); // Xóa lỗi khi mở form
     setShowForm(true);
   };
 
   const openAdd = () => {
     setEditUser(null);
     setFormData(initialFormData);
+    setError(""); // Xóa lỗi khi mở form
     setShowForm(true);
   };
 
@@ -116,6 +140,9 @@ const Customers = () => {
         {showForm && (
           <div className="form-box">
             <h3>{editUser ? "Chỉnh sửa người dùng" : "Thêm người dùng"}</h3>
+
+            {/* ✅ 3. Hiển thị thông báo lỗi */}
+            {error && <p className="error-message">{error}</p>}
 
             <input type="text" name="name" placeholder="Tên" value={formData.name} onChange={handleChange} />
             <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} />

@@ -34,7 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 // ROUTES
 // ================================
 app.use("/api/users", userRoutes);
-app.use("/api", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api", menuRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
@@ -46,7 +46,7 @@ app.use("/api/dashboard", dashboardRouter);
 app.use("/api/zalopay", zalopayRoutes);
 app.use("/api/address", addressRoutes);
 app.use("/api/geocode", geocodeRouter);
-  app.use("/api/drone-delivery", droneDeliveryRoutes);
+app.use("/api/drone-delivery", droneDeliveryRoutes);
 
 // 🚀 DÙNG ĐÚNG 1 LẦN
 app.use("/api", droneDeliveryRoutes);

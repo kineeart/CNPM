@@ -73,27 +73,6 @@ const Home = () => {
           </div>
         )}
 
-        {/* SẢN PHẨM NỔI BẬT */}
-        <h2 className="section-title">Sản phẩm nổi bật</h2>
-        {featuredProducts.length === 0 ? (
-          <p className="loading-text">Đang tải sản phẩm...</p>
-        ) : (
-          <div className="product-grid">
-            {featuredProducts.map((product) => (
-              <div key={product.id} className="product-card">
-                <div
-                  className="product-image"
-                  style={{ backgroundImage: `url(${product.imageUrl})` }}
-                ></div>
-                <div className="product-info">
-                  <h3>{product.name}</h3>
-                  <p>{product.description}</p>
-                  <strong>{product.price} VNĐ</strong>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </>
   );

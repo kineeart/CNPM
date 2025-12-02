@@ -200,4 +200,142 @@ router.get("/delivery/progress/:orderId", async (req, res) => {
   }
 });
 
+router.post("/drone-delivery/:id/start", async (req, res) => {
+  const { id } = req.params;
+  const { orderId } = req.body;
+
+  const drone = await Drone.findByPk(id, { include: [Store] });
+  const order = await Order.findByPk(orderId);
+
+  drone.status = "FLYING";
+  await drone.save();
+
+  // Hàm mô phỏng bay bất đồng bộ
+  startDeliveryProcess(drone, order);
+
+  return res.json({ message: "Drone đã bắt đầu giao hàng" });
+});
+
+
+async function startDeliveryProcess(drone, order) {
+  const store = drone.Store;
+
+  // 1️⃣ Bay đến khách
+  await flyDrone(drone, store.latitude, store.longitude, order.latitude, order.longitude);
+
+  // 2️⃣ Đến nơi → giao hàng
+  drone.status = "DELIVERED";
+  await drone.save();
+
+  // Chờ 5 giây mô phỏng giao
+  await wait(5000);
+
+  // 3️⃣ Bắt đầu quay về store
+  drone.status = "RETURNING";
+  await drone.save();
+
+  // 4️⃣ Bay về store
+  await flyDrone(drone, order.latitude, order.longitude, store.latitude, store.longitude);
+
+  // 5️⃣ Về đến nơi
+  drone.status = "WAITING";
+  drone.currentLat = store.latitude;
+  drone.currentLng = store.longitude;
+  await drone.save();
+}
+
+async function flyDrone(drone, fromLat, fromLng, toLat, toLng) {
+  const steps = 200;   // càng nhiều drone càng mượt
+  const delay = 50;    // tốc độ update càng nhỏ càng mượt
+
+  for (let i = 0; i <= steps; i++) {
+    const lat = fromLat + (toLat - fromLat) * (i / steps);
+    const lng = fromLng + (toLng - fromLng) * (i / steps);
+
+    drone.currentLat = lat;
+    drone.currentLng = lng;
+    await drone.save();
+
+    await wait(delay);
+  }
+}
+
+router.post("/drone-delivery/:id/cancel", async (req, res) => {
+  const { id } = req.params;
+
+  const drone = await Drone.findByPk(id, { include: [Store] });
+
+  if (drone.status === "FLYING") {
+    drone.status = "RETURNING";
+    await drone.save();
+
+    const store = drone.Store;
+
+    // Bay từ vị trí hiện tại về store
+    flyDrone(drone, drone.currentLat, drone.currentLng, store.latitude, store.longitude)
+      .then(async () => {
+        drone.status = "WAITING";
+        await drone.save();
+      });
+  }
+
+  return res.json({ message: "Drone sẽ quay về" });
+});
+
+// =======================
+// POST cập nhật status của drone
+// =======================
+router.post("/:id/status", async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ error: "Trạng thái (status) là bắt buộc" });
+  }
+
+  try {
+    const drone = await DroneDelivery.findByPk(id);
+    if (!drone) {
+      return res.status(404).json({ error: "Drone không tồn tại" });
+    }
+
+    // Nếu chuyển sang WAITING, xóa orderId
+    const updateData = { status };
+    if (status === "WAITING") {
+      updateData.orderId = null;
+    }
+
+    await drone.update(updateData);
+    res.json({ message: `Cập nhật trạng thái drone thành ${status}`, drone });
+  } catch (err) {
+    console.error("❌ Lỗi cập nhật status drone:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// =======================
+// PUT cập nhật drone
+// =======================
+router.put("/:id", async (req, res) => {
+  const { id } = req.params;
+  const { name, speed } = req.body;
+
+  try {
+    const drone = await DroneDelivery.findByPk(id);
+    if (!drone) {
+      return res.status(404).json({ error: "Drone không tồn tại" });
+    }
+
+    // Chỉ cập nhật các trường được cung cấp
+    if (name) drone.name = name;
+    if (speed !== undefined) drone.speed = speed;
+
+    await drone.save();
+    res.json({ message: "Cập nhật drone thành công", data: drone });
+  } catch (err) {
+    console.error("❌ Lỗi cập nhật drone:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

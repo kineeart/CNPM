@@ -72,8 +72,8 @@
   position: absolute;
   right: 0;
   margin-top: 6px;
-  background: white;
-  color: #333;
+  background: rgb(200, 132, 132);
+  color: #000000;
   width: 160px;
   border-radius: 8px;
   overflow: hidden;
@@ -85,7 +85,7 @@
   width: 100%;
   padding: 10px 14px;
   text-align: left;
-  background: white;
+  background: rgb(200, 132, 132);
   border: none;
   cursor: pointer;
   font-size: 14px;
