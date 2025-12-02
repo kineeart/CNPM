@@ -33,7 +33,6 @@ export const Product = sequelize.define(
 
 
 
-// 🔗 Quan hệ
 Store.hasMany(Product, { foreignKey: "storeId", as: "products" });
 Product.belongsTo(Store, { foreignKey: "storeId", as: "store" });
 

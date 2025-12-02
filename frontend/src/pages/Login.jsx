@@ -10,44 +10,45 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post(`${BACKEND_URL}/users/login`, {
-  email,
-  password,
-});
+const handleLogin = async (e) => {
+  e.preventDefault();
 
+  try {
+    const res = await axios.post(`${BACKEND_URL}/users/login`, {
+      email,
+      password,
+    });
 
-      const token = res.data.token;
-      const payload = JSON.parse(atob(token.split(".")[1]));
+    const user = res.data.user;
 
-      const userId = payload?.id;
-      const userEmail = payload?.email;
-      const userRole = payload?.role;
-
-      // Lưu token và thông tin user
-      localStorage.setItem("token", token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ id: userId, email: userEmail, role: userRole })
-      );
-
-      // ⭐ Điều hướng dựa vào ROLE
-if (userRole === "ADMIN") {
-  navigate("/dashboard-bigadmin");
-} else if (userRole === "STORE_ADMIN") {
-  navigate("/dashboard");
-} else {
-  navigate("/home");
-}
-
-
-    } catch (err) {
-      console.error("❌ Đăng nhập thất bại:", err.response?.data || err.message);
-      alert("Sai email hoặc mật khẩu!");
+    if (!user) {
+      throw new Error("Không nhận được thông tin user từ backend");
     }
-  };
+
+    // Lưu user vào localStorage
+    localStorage.setItem(
+      "user",
+      JSON.stringify({
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      })
+    );
+
+    // Điều hướng theo quyền
+    if (user.role === "ADMIN") {
+      navigate("/dashboard-bigadmin");
+    } else if (user.role === "STORE_ADMIN") {
+      navigate("/dashboard");
+    } else {
+      navigate("/home");
+    }
+  } catch (err) {
+    console.error("❌ Đăng nhập thất bại:", err.response?.data || err.message);
+    alert("Sai email hoặc mật khẩu!");
+  }
+};
+  
 
   return (
     <div className="login-background">

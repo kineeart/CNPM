@@ -46,22 +46,24 @@ export const getProducts = async (req, res) => {
 // 🟢 Tạo món ăn mới — KHÔNG còn categoryId
 export const createProduct = async (req, res) => {
   try {
-    const { storeId, name, price, description, imageUrl } = req.body;
+const userId = req.query.userId;
+    const { storeId } = req.body;
 
-    const product = await Product.create({
-      storeId,
-      name,
-      price,
-      description,
-      imageUrl
+    const store = await Store.findOne({
+      where: { id: storeId, ownerId: userId }
     });
 
-    res.status(201).json({ message: "Thêm món ăn thành công", product });
+    if (!store) return res.status(403).json({ message: "❌ Không phải chủ cửa hàng" });
+
+    const product = await Product.create(req.body);
+    res.status(201).json(product);
+
   } catch (error) {
-    console.error("❌ Lỗi createProduct:", error);
-    res.status(500).json({ message: "Không thể thêm món ăn" });
+    console.error("❌ Lỗi create:", error);
+    res.status(500).json({ message: "Lỗi server" });
   }
 };
+
 
 
 // 🟡 Cập nhật món ăn
@@ -100,19 +102,55 @@ export const deleteProduct = async (req, res) => {
 // 🟢 Lấy sản phẩm theo storeId — KHÔNG còn Category
 export const getProductsByStoreId = async (req, res) => {
   try {
-    const { storeId } = req.params;
+    const storeId = req.params.storeId;
+    const userId = req.query.userId;
+
+    console.log("storeId:", storeId, "userId:", userId);
+
+    // Tìm store theo id và owner
+    const store = await Store.findOne({
+      where: { id: storeId, ownerId: userId },
+    });
+
+    if (!store) {
+      console.error("Không tìm thấy store hoặc không thuộc user", storeId, userId);
+      return res.status(404).json({ error: "Store không tồn tại hoặc không thuộc user" });
+    }
 
     const products = await Product.findAll({
-      where: { storeId },
+      where: { storeId: store.id }, // an toàn: store đã tồn tại
       include: [{ model: Store, as: "store" }],
     });
 
     res.json(products);
-  } catch (error) {
-    console.error("❌ Lỗi khi lấy sản phẩm theo cửa hàng:", error);
-    res.status(500).json({ message: "Lỗi server khi lấy sản phẩm" });
+  } catch (err) {
+    console.error("Lỗi khi lấy sản phẩm theo cửa hàng:", err);
+    res.status(500).json({ error: "Lỗi server" });
   }
 };
+
+
+export const getProductsByStore = async (req, res) => {
+  try {
+    const storeId = req.params.storeId;
+    const userId = req.query.userId; // từ frontend gửi lên
+
+    // 🔥 Kiểm tra store thuộc userId
+    const store = await Store.findOne({ where: { id: storeId, ownerId: userId } });
+    if (!store) return res.status(404).json({ error: "Store không tồn tại hoặc không thuộc user" });
+
+    const products = await Product.findAll({
+      where: { storeId },
+      include: [{ model: Store, as: "store" }]
+    });
+
+    res.json(products);
+  } catch (err) {
+    console.error("Lỗi getProductsByStore:", err); // 🔥 Log lỗi thật chi tiết
+    res.status(500).json({ error: "Lỗi server" });
+  }
+};
+
 
 export const getAllProducts = async (req, res) => {
   try {

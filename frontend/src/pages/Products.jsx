@@ -4,13 +4,24 @@ import Sidebar from "./Sidebar";
 import "../css/Products.css";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-const API_USERS = `${BACKEND_URL}/users`;
 const API_PRODUCTS = `${BACKEND_URL}/products`;
+const STORE_API = `${BACKEND_URL}/stores`;
+
+const user = JSON.parse(localStorage.getItem("user"));
+const userId = user?.id;
 
 const Products = () => {
+  const [currentStore, setCurrentStore] = useState(null);
+
+useEffect(() => {
+  fetchStoreOfUser().then(store => setCurrentStore(store));
+}, []);
+
   const [products, setProducts] = useState([]);
-  const [stores, setStores] = useState([]);
+  const [storeId, setStoreId] = useState(null);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
+
   const [formData, setFormData] = useState({
     storeId: "",
     name: "",
@@ -20,29 +31,34 @@ const Products = () => {
     isAvailable: true,
     soldOutUntil: "",
   });
-  const [isAdding, setIsAdding] = useState(false);
 
+  // Load store của user khi mở trang
   useEffect(() => {
-    fetchProducts();
-    fetchStores();
+    fetchStoreOfUser();
   }, []);
 
-  const fetchStores = async () => {
-    try {
-      const res = await axios.get(STORE_API);
-      setStores(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+  // Khi có storeId → load sản phẩm
+  useEffect(() => {
+    if (storeId) fetchProducts();
+  }, [storeId]);
+
+  const fetchStoreOfUser = async () => {
+    const res = await axios.get(STORE_API);
+
+      const userStore = res.data.find((s) => s.ownerId === userId);
+      if (!userStore) {
+        alert("Bạn chưa có cửa hàng nào!");
+        return;
+      }
+
+    setStoreId(userStore.id);
   };
 
   const fetchProducts = async () => {
-    try {
-      const res = await axios.get(API_URL);
-      setProducts(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+    const res = await axios.get(`${API_PRODUCTS}/store/${storeId}`, {
+      params: { userId },
+    });
+    setProducts(res.data);
   };
 
   const handleEdit = (p) => {
@@ -63,7 +79,7 @@ const Products = () => {
     setEditingProduct({});
     setIsAdding(true);
     setFormData({
-      storeId: "",
+      storeId: storeId, // auto set vào store của user
       name: "",
       price: "",
       description: "",
@@ -73,24 +89,33 @@ const Products = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (isAdding) {
-        await axios.post(API_URL, formData);
-        alert("Thêm sản phẩm thành công!");
-      } else {
-        await axios.put(`${API_URL}/${editingProduct.id}`, formData);
-        alert("Cập nhật sản phẩm thành công!");
-      }
-      fetchProducts();
-      setEditingProduct(null);
-      setIsAdding(false);
-    } catch (err) {
-      console.error(err);
-      alert("Lỗi xử lý sản phẩm");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const storeId = currentStore?.id;
+if (!storeId) {
+  alert("User chưa có cửa hàng!");
+  return;
+}
+
+
+    const dataToSend = { ...formData, storeId }; // gán storeId
+    if (isAdding) {
+      await axios.post(API_URL, dataToSend);
+      alert("Thêm sản phẩm thành công!");
+    } else {
+      await axios.put(`${API_URL}/${editingProduct.id}`, dataToSend);
+      alert("Cập nhật sản phẩm thành công!");
     }
-  };
+    fetchProducts();
+    setEditingProduct(null);
+    setIsAdding(false);
+  } catch (err) {
+    console.error(err);
+    alert("Lỗi xử lý sản phẩm");
+  }
+};
+
 
   return (
     <div style={{ display: "flex" }}>
@@ -98,13 +123,15 @@ const Products = () => {
 
       <div className="products-page">
         <h2>Danh sách sản phẩm</h2>
-        <button className="add-btn" onClick={handleAdd}>➕ Thêm sản phẩm</button>
+
+        <button className="add-btn" onClick={handleAdd}>
+          ➕ Thêm sản phẩm
+        </button>
 
         <table className="products-table">
           <thead>
             <tr>
               <th>STT</th>
-              <th>Store</th>
               <th>Hình ảnh</th>
               <th>Tên</th>
               <th>Giá</th>
@@ -117,18 +144,20 @@ const Products = () => {
             {products.map((p, i) => (
               <tr key={p.id}>
                 <td>{i + 1}</td>
-                <td>{p.Store ? p.Store.name : "Không có"}</td>
-                <td><img src={p.imageUrl} alt={p.name} /></td>
+                <td>
+                  <img src={p.imageUrl} alt={p.name} />
+                </td>
                 <td>{p.name}</td>
                 <td>{p.price.toLocaleString()} ₫</td>
                 <td>{p.description}</td>
                 <td>{p.isAvailable ? "✔ Còn hàng" : "❌ Hết hàng"}</td>
+
                 <td>
                   <button onClick={() => handleEdit(p)}>Sửa</button>
                   <button
                     onClick={async () => {
                       if (window.confirm("Xác nhận xóa?")) {
-                        await axios.delete(`${API_URL}/${p.id}`);
+                        await axios.delete(`${API_PRODUCTS}/${p.id}`);
                         fetchProducts();
                       }
                     }}
@@ -148,23 +177,13 @@ const Products = () => {
               <h3>{isAdding ? "Thêm sản phẩm" : "Chỉnh sửa sản phẩm"}</h3>
 
               <label>
-                Thuộc cửa hàng:
-                <select
-                  value={formData.storeId}
-                  onChange={(e) => setFormData({ ...formData, storeId: e.target.value })}
-                  required
-                >
-                  <option value="">-- Chọn store --</option>
-                  {stores.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-              </label>
-
-              <label>
                 Ảnh URL:
                 <input
                   type="text"
                   value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, imageUrl: e.target.value })
+                  }
                   required
                 />
               </label>
@@ -174,7 +193,9 @@ const Products = () => {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                 />
               </label>
@@ -184,7 +205,9 @@ const Products = () => {
                 <input
                   type="number"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, price: e.target.value })
+                  }
                   required
                 />
               </label>
@@ -193,7 +216,9 @@ const Products = () => {
                 Mô tả:
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   rows={3}
                 />
               </label>
@@ -203,7 +228,9 @@ const Products = () => {
                 <input
                   type="checkbox"
                   checked={formData.isAvailable}
-                  onChange={(e) => setFormData({ ...formData, isAvailable: e.target.checked })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, isAvailable: e.target.checked })
+                  }
                 />
               </label>
 
@@ -212,12 +239,21 @@ const Products = () => {
                 <input
                   type="datetime-local"
                   value={formData.soldOutUntil}
-                  onChange={(e) => setFormData({ ...formData, soldOutUntil: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      soldOutUntil: e.target.value,
+                    })
+                  }
                 />
               </label>
 
-              <button type="submit">{isAdding ? "Thêm" : "Lưu"}</button>
-              <button type="button" onClick={() => setEditingProduct(null)}>Hủy</button>
+              <button type="submit">
+                {isAdding ? "Thêm" : "Lưu"}
+              </button>
+              <button type="button" onClick={() => setEditingProduct(null)}>
+                Hủy
+              </button>
             </form>
           </div>
         )}

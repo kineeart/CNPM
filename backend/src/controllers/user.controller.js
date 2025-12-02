@@ -37,22 +37,25 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ where: { email } });
-    if (!user)
-      return res.status(400).json({ message: "Email không tồn tại" });
 
-    if (password !== user.password)
-      return res.status(400).json({ message: "Sai mật khẩu" });
+    if (!user) {
+      return res.status(400).json({ error: "Email không tồn tại" });
+    }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: "1d" }
-    );
+    if (user.password !== password) {
+      return res.status(400).json({ error: "Sai mật khẩu" });
+    }
 
-    res.json({ message: "Đăng nhập thành công", token });
+    // 🔥 IN USER ID KHI ĐĂNG NHẬP
+    console.log("🔐 Đăng nhập thành công — User ID:", user.id);
 
+    return res.json({
+      message: "Đăng nhập thành công",
+      user,
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Lỗi đăng nhập:", err);
+    res.status(500).json({ error: "Lỗi server" });
   }
 };
 

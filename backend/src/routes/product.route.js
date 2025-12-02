@@ -5,7 +5,8 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-    getProductsByStoreId, // 👈 thêm
+    getProductsByStoreId,
+    getProductsByStore, // 👈 thêm
 
 } from "../controllers/product.controller.js";
 
@@ -20,6 +21,7 @@ router.delete("/:id", deleteProduct);
 
 // Lấy tất cả sản phẩm của 1 cửa hàng
 router.get("/store/:storeId", getProductsByStoreId);
+router.get("/store/:storeId", getProductsByStore);
 
 // product.route.js
 router.get("/store/:storeId", async (req, res) => {
