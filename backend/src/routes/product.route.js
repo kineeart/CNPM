@@ -5,33 +5,22 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
-    getProductsByStoreId,
-    getProductsByStore, // 👈 thêm
-
+  getProductsByStore, // 👈 thêm
+  getPublicProductsByStore, // Thêm vào đây
 } from "../controllers/product.controller.js";
 
 const router = express.Router();
 
-router.get("/store/:storeId", getProductsByStoreId); // đặt trước
 router.get("/", getProducts);
 router.get("/:id", getProductById);
 router.post("/", createProduct);
 router.put("/:id", updateProduct);
 router.delete("/:id", deleteProduct);
 
-// Lấy tất cả sản phẩm của 1 cửa hàng
-router.get("/store/:storeId", getProductsByStoreId);
+// Lấy sản phẩm của 1 cửa hàng (private: cần userId là owner)
 router.get("/store/:storeId", getProductsByStore);
 
-// product.route.js
-router.get("/store/:storeId", async (req, res) => {
-  try {
-    const products = await Product.findAll({ where: { storeId: req.params.storeId } });
-    res.json(products);
-  } catch (err) {
-    console.error("❌ Lỗi lấy sản phẩm theo cửa hàng:", err);
-    res.status(500).json({ message: "Lỗi server" });
-  }
-});
+// Lấy sản phẩm public cho StoreDetail (không cần userId)
+router.get("/store/:storeId/public", getPublicProductsByStore);
 
 export default router;

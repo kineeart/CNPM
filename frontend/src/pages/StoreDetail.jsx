@@ -6,12 +6,27 @@ import Navbar from "../components/Navbar";
 import Notification from "../components/Notification";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+const API_PRODUCTS = `${BACKEND_URL}/products`;
 
 const StoreDetail = () => {
   const { id } = useParams();
   const [products, setProducts] = useState([]);
   const [store, setStore] = useState(null);
   const [notification, setNotification] = useState(null); // popup notification
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?.id ? Number(user.id) : null;
+
+  const fetchProducts = async () => {
+    if (!id) return;
+    try {
+      // GỌI ENDPOINT PUBLIC
+      const res = await axios.get(`${API_PRODUCTS}/store/${id}/public`);
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Lỗi tải sản phẩm StoreDetail:", err);
+    }
+  };
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -20,15 +35,6 @@ const StoreDetail = () => {
         setStore(storeRes.data);
       } catch (err) {
         console.error("❌ Lỗi khi tải cửa hàng:", err);
-      }
-    };
-
-    const fetchProducts = async () => {
-      try {
-        const res = await axios.get(`${BACKEND_URL}/products/store/${id}`);
-        setProducts(res.data);
-      } catch (err) {
-        console.error("❌ Lỗi khi tải sản phẩm:", err);
       }
     };
 
@@ -104,7 +110,7 @@ const StoreDetail = () => {
                     <h3>{prod.name}</h3>
                     <p>{prod.description}</p>
                     <strong>{prod.price.toLocaleString()}₫</strong>
-                    <button>Thêm vào giỏ</button>
+                    <button onClick={() => handleAddToCart(prod)}>Thêm vào giỏ</button>
                   </div>
                 </div>
               ))}

@@ -8,17 +8,11 @@ const API_PRODUCTS = `${BACKEND_URL}/products`;
 const STORE_API = `${BACKEND_URL}/stores`;
 
 const user = JSON.parse(localStorage.getItem("user"));
-const userId = user?.id;
+const userId = user?.id ? Number(user.id) : null;
 
 const Products = () => {
-  const [currentStore, setCurrentStore] = useState(null);
-
-useEffect(() => {
-  fetchStoreOfUser().then(store => setCurrentStore(store));
-}, []);
-
-  const [products, setProducts] = useState([]);
   const [storeId, setStoreId] = useState(null);
+  const [products, setProducts] = useState([]);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
 
@@ -32,35 +26,46 @@ useEffect(() => {
     soldOutUntil: "",
   });
 
-  // Load store của user khi mở trang
+  // 🟦 1. Lấy cửa hàng của user
+  const fetchStoreOfUser = async () => {
+    try {
+      const res = await axios.get(STORE_API);
+      // Ép kiểu để tránh lệch kiểu dữ liệu
+      const store = res.data.find((s) => Number(s.ownerId) === Number(userId));
+      if (!store) {
+        console.warn("Không tìm thấy store của user:", userId);
+        return;
+      }
+      setStoreId(store.id);
+    } catch (e) {
+      console.error("Lỗi fetchStoreOfUser:", e);
+    }
+  };
+
   useEffect(() => {
     fetchStoreOfUser();
   }, []);
 
-  // Khi có storeId → load sản phẩm
+  // 🟩 2. Khi có storeId → load sản phẩm
   useEffect(() => {
-    if (storeId) fetchProducts();
+    if (storeId) {
+      fetchProducts();
+    }
   }, [storeId]);
 
-  const fetchStoreOfUser = async () => {
-    const res = await axios.get(STORE_API);
-
-      const userStore = res.data.find((s) => s.ownerId === userId);
-      if (!userStore) {
-        alert("Bạn chưa có cửa hàng nào!");
-        return;
-      }
-
-    setStoreId(userStore.id);
-  };
-
+  // 🟦 3. Load sản phẩm
   const fetchProducts = async () => {
-    const res = await axios.get(`${API_PRODUCTS}/store/${storeId}`, {
-      params: { userId },
-    });
-    setProducts(res.data);
+    try {
+      const res = await axios.get(`${API_PRODUCTS}/store/${storeId}`, {
+        params: { userId }
+      });
+      setProducts(res.data);
+    } catch (err) {
+      console.error("Lỗi tải sản phẩm:", err);
+    }
   };
 
+  // 🟦 4. Bấm sửa
   const handleEdit = (p) => {
     setEditingProduct(p);
     setIsAdding(false);
@@ -71,15 +76,18 @@ useEffect(() => {
       description: p.description,
       imageUrl: p.imageUrl,
       isAvailable: p.isAvailable,
-      soldOutUntil: p.soldOutUntil ? p.soldOutUntil.substring(0, 16) : "",
+      soldOutUntil: p.soldOutUntil
+        ? p.soldOutUntil.substring(0, 16)
+        : "",
     });
   };
 
+  // 🟦 5. Bấm thêm
   const handleAdd = () => {
     setEditingProduct({});
     setIsAdding(true);
     setFormData({
-      storeId: storeId, // auto set vào store của user
+      storeId,
       name: "",
       price: "",
       description: "",
@@ -89,33 +97,40 @@ useEffect(() => {
     });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const storeId = currentStore?.id;
-if (!storeId) {
-  alert("User chưa có cửa hàng!");
-  return;
-}
+  // 🟦 6. Submit thêm/sửa
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-
-    const dataToSend = { ...formData, storeId }; // gán storeId
-    if (isAdding) {
-      await axios.post(API_URL, dataToSend);
-      alert("Thêm sản phẩm thành công!");
-    } else {
-      await axios.put(`${API_URL}/${editingProduct.id}`, dataToSend);
-      alert("Cập nhật sản phẩm thành công!");
+    if (!storeId) {
+      alert("Không tìm thấy storeId!");
+      return;
     }
-    fetchProducts();
-    setEditingProduct(null);
-    setIsAdding(false);
-  } catch (err) {
-    console.error(err);
-    alert("Lỗi xử lý sản phẩm");
-  }
-};
 
+    const priceNum = Number(formData.price);
+    if (Number.isNaN(priceNum) || priceNum < 0) {
+      alert("Giá sản phẩm phải ≥ 0");
+      return;
+    }
+
+    const dataToSend = { ...formData, storeId, price: priceNum };
+
+    try {
+      if (isAdding) {
+        await axios.post(API_PRODUCTS, dataToSend, { params: { userId } });
+        alert("Thêm sản phẩm thành công!");
+      } else {
+        await axios.put(`${API_PRODUCTS}/${editingProduct.id}`, dataToSend, { params: { userId } });
+        alert("Cập nhật sản phẩm thành công!");
+      }
+
+      fetchProducts();
+      setEditingProduct(null);
+      setIsAdding(false);
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi xử lý sản phẩm!");
+    }
+  };
 
   return (
     <div style={{ display: "flex" }}>
@@ -144,9 +159,7 @@ if (!storeId) {
             {products.map((p, i) => (
               <tr key={p.id}>
                 <td>{i + 1}</td>
-                <td>
-                  <img src={p.imageUrl} alt={p.name} />
-                </td>
+                <td><img src={p.imageUrl} alt={p.name} /></td>
                 <td>{p.name}</td>
                 <td>{p.price.toLocaleString()} ₫</td>
                 <td>{p.description}</td>
@@ -157,11 +170,18 @@ if (!storeId) {
                   <button
                     onClick={async () => {
                       if (window.confirm("Xác nhận xóa?")) {
-                        await axios.delete(`${API_PRODUCTS}/${p.id}`);
-                        fetchProducts();
+                        try {
+                          await axios.delete(`${API_PRODUCTS}/${p.id}`, {
+                            params: { userId } // 👈 truyền userId bắt buộc
+                          });
+                          fetchProducts();
+                        } catch (err) {
+                          console.error("Xóa sản phẩm lỗi:", err.response?.data || err.message);
+                          alert(err.response?.data?.message || "Không thể xóa sản phẩm");
+                        }
                       }
                     }}
-                    style={{ marginLeft: "8px" }}
+                    style={{ marginLeft: 8 }}
                   >
                     Xóa
                   </button>
@@ -204,9 +224,11 @@ if (!storeId) {
                 Giá:
                 <input
                   type="number"
+                  min="0"
+                  step="1000"
                   value={formData.price}
                   onChange={(e) =>
-                    setFormData({ ...formData, price: e.target.value })
+                    setFormData({ ...formData, price: Math.max(0, Number(e.target.value || 0)) })
                   }
                   required
                 />
@@ -251,6 +273,7 @@ if (!storeId) {
               <button type="submit">
                 {isAdding ? "Thêm" : "Lưu"}
               </button>
+
               <button type="button" onClick={() => setEditingProduct(null)}>
                 Hủy
               </button>

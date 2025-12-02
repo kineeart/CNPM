@@ -7,8 +7,9 @@ export const Product = sequelize.define(
   "product",
   {
     id: {
-      type: DataTypes.STRING,
+      type: DataTypes.INTEGER,
       primaryKey: true,
+      autoIncrement: true,
     },
     storeId: {
       type: DataTypes.STRING,
