@@ -24,6 +24,15 @@ export const Product = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: true,
     },
+    // ✅ Thêm trường inventory
+    inventory: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      validate: {
+        min: 0, // Đảm bảo tồn kho không bao giờ âm
+      },
+    },
   },
   {
     tableName: "product",
@@ -31,8 +40,6 @@ export const Product = sequelize.define(
     timestamps: false,
   }
 );
-
-
 
 Store.hasMany(Product, { foreignKey: "storeId", as: "products" });
 Product.belongsTo(Store, { foreignKey: "storeId", as: "store" });

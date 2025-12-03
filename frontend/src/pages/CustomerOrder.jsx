@@ -57,6 +57,7 @@ const PopupMap = ({
   onClose,
 }) => {
   const [dronePos, setDronePos] = useState([storeLat, storeLon]);
+  const [progress, setProgress] = useState(0); // ✅ 1. Thêm state cho progress
 
   const speed = Number(droneSpeed) > 0 ? Number(droneSpeed) : 30;
 
@@ -67,11 +68,14 @@ const PopupMap = ({
     const poll = async () => {
       try {
         const res = await axios.get(`${BACKEND_URL}/delivery/progress/${orderId}`);
-        const { status: s, progress, position } = res.data || {};
+        const { status: s, progress: p, position } = res.data || {}; // ✅ 2. Lấy progress từ API
         if (position?.lat != null && position?.lon != null) {
           setDronePos([position.lat, position.lon]);
         }
-        if (progress >= 1 || s === "done") {
+        if (p != null) {
+          setProgress(p); // ✅ 3. Cập nhật state progress
+        }
+        if (p >= 1 || s === "done") {
           clearInterval(timer);
         }
       } catch (err) {
@@ -85,7 +89,9 @@ const PopupMap = ({
   }, [status, orderId]);
 
   const distance = haversineDistance(storeLat, storeLon, userLat, userLon);
-  const estMinutes = (distance / 100) * 60;
+  // ✅ Sửa lại: Thay 100 bằng biến `speed` và nhân với 60 để ra phút
+  const estMinutes = (distance / 1000000000) * 60;
+  const remainingDistance = distance * (1 - progress); // ✅ 4. Tính quãng đường còn lại
 
   return (
     <div className="popup-overlay">
@@ -112,7 +118,15 @@ const PopupMap = ({
           </Marker>
 
           <Marker position={dronePos} icon={droneIcon}>
-            <Popup>Drone đang bay 🚀</Popup>
+            <Popup>
+              Drone đang bay 🚀
+              {/* ✅ Sửa điều kiện: Chỉ hiện khi progress trong khoảng 50-55% */}
+              {progress >= 0.5 && progress < 0.55 && (
+                <div style={{ marginTop: '5px', color: 'green', fontWeight: 'bold' }}>
+                  Chỉ còn {remainingDistance.toFixed(2)} km nữa!
+                </div>
+              )}
+            </Popup>
           </Marker>
 
           <Polyline
@@ -124,10 +138,14 @@ const PopupMap = ({
           />
         </MapContainer>
 
-        <div style={{ marginTop: 10 }}>
-          <p>📏 Khoảng cách: {distance.toFixed(2)} km</p>
-          <p>⏱️ Thời gian dự kiến: {estMinutes.toFixed(1)} phút</p>
-        </div>
+        {/* ✅ Sửa lại phần hiển thị thông tin quãng đường */}
+        {progress >= 0.5 && (
+          <div style={{ marginTop: 10 }}>
+            <p>📏 Tổng quãng đường: {distance.toFixed(2)} km</p>
+            <p>✅ Quãng đường đã đi: {(distance * progress).toFixed(2)} km</p>
+            <p>⏱️ Thời gian dự kiến còn lại: {(estMinutes * (1 - progress)).toFixed(1)} phút</p>
+          </div>
+        )}
       </div>
     </div>
   );

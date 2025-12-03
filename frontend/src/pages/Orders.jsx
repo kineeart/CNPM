@@ -43,18 +43,22 @@ const droneIcon = new L.Icon({ iconUrl: "/icons/drone.png", iconSize: [40, 40], 
 // Popup Map & Drone Animation
 // Popup Map & Drone Smooth Animation
 const PopupMap = ({ storeLat, storeLon, userLat, userLon, orderId }) => {
-  const [dronePos, setDronePos] = useState([storeLat, storeLon]);     
-  const [targetPos, setTargetPos] = useState([storeLat, storeLon]);    
+  const [dronePos, setDronePos] = useState([storeLat, storeLon]);
+  const [targetPos, setTargetPos] = useState([storeLat, storeLon]);
+  const [progress, setProgress] = useState(0); // ✅ 1. Thêm state cho progress
 
   // 🔄 Poll backend mỗi 1.5s
   useEffect(() => {
     const poll = async () => {
       try {
         const res = await axios.get(`${DRONE_API}/delivery/progress/${orderId}`);
-        const pos = res.data.position;
+        const { position, progress: p } = res.data; // ✅ 2. Lấy progress từ API
 
         if (pos?.lat != null && pos?.lon != null) {
           setTargetPos([pos.lat, pos.lon]);
+        }
+        if (p != null) {
+          setProgress(p); // ✅ 3. Cập nhật state progress
         }
       } catch (e) {
         console.error("Lỗi poll:", e);
@@ -94,7 +98,18 @@ const PopupMap = ({ storeLat, storeLon, userLat, userLon, orderId }) => {
 
           <Marker position={[storeLat, storeLon]} icon={storeIcon} />
           <Marker position={[userLat, userLon]} icon={userIcon} />
-          <Marker position={dronePos} icon={droneIcon} />
+          <Marker position={dronePos} icon={droneIcon}>
+            {/* ✅ 4. Thêm Popup vào Marker của Drone */}
+            <Popup>
+              Drone đang bay...
+              {/* ✅ Sửa điều kiện: Chỉ hiện khi progress trong khoảng 50-55% */}
+              {progress >= 0.5 && progress < 0.55 && (
+                <div style={{ marginTop: '5px', color: 'green', fontWeight: 'bold' }}>
+                  Còn {(haversineDistance(userLat, userLon, dronePos[0], dronePos[1])).toFixed(2)} km
+                </div>
+              )}
+            </Popup>
+          </Marker>
 
           <Polyline positions={[[storeLat, storeLon], [userLat, userLon]]} color="blue" />
         </MapContainer>

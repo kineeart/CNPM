@@ -23,6 +23,7 @@ const Products = () => {
     description: "",
     imageUrl: "",
     isAvailable: true,
+    inventory: 0, // ✅ Thêm
     soldOutUntil: "",
   });
 
@@ -76,6 +77,7 @@ const Products = () => {
       description: p.description,
       imageUrl: p.imageUrl,
       isAvailable: p.isAvailable,
+      inventory: p.inventory, // ✅ Thêm
       soldOutUntil: p.soldOutUntil
         ? p.soldOutUntil.substring(0, 16)
         : "",
@@ -93,6 +95,7 @@ const Products = () => {
       description: "",
       imageUrl: "",
       isAvailable: true,
+      inventory: 0, // ✅ Thêm
       soldOutUntil: "",
     });
   };
@@ -111,8 +114,14 @@ const Products = () => {
       alert("Giá sản phẩm phải ≥ 0");
       return;
     }
+    // ✅ Thêm validation cho inventory
+    const inventoryNum = Number(formData.inventory);
+    if (Number.isNaN(inventoryNum) || inventoryNum < 0) {
+      alert("Tồn kho phải là số và ≥ 0");
+      return;
+    }
 
-    const dataToSend = { ...formData, storeId, price: priceNum };
+    const dataToSend = { ...formData, storeId, price: priceNum, inventory: inventoryNum }; // ✅ Thêm
 
     try {
       if (isAdding) {
@@ -150,6 +159,7 @@ const Products = () => {
               <th>Hình ảnh</th>
               <th>Tên</th>
               <th>Giá</th>
+              <th>Tồn kho</th> {/* ✅ Thêm cột */}
               <th>Mô tả</th>
               <th>Trạng thái</th>
               <th>Hành động</th>
@@ -162,6 +172,7 @@ const Products = () => {
                 <td><img src={p.imageUrl} alt={p.name} /></td>
                 <td>{p.name}</td>
                 <td>{p.price.toLocaleString()} ₫</td>
+                <td>{p.inventory}</td> {/* ✅ Thêm dữ liệu */}
                 <td>{p.description}</td>
                 <td>{p.isAvailable ? "✔ Còn hàng" : "❌ Hết hàng"}</td>
 
@@ -229,6 +240,19 @@ const Products = () => {
                   value={formData.price}
                   onChange={(e) =>
                     setFormData({ ...formData, price: Math.max(0, Number(e.target.value || 0)) })
+                  }
+                  required
+                />
+              </label>
+
+              <label>
+                Tồn kho:
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.inventory}
+                  onChange={(e) =>
+                    setFormData({ ...formData, inventory: Math.max(0, Number(e.target.value || 0)) })
                   }
                   required
                 />

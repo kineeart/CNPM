@@ -5,23 +5,40 @@ import { Product } from "../models/product.model.js";
 import { Order } from "../models/order.model.js";
 import { OrderItem } from "../models/orderItem.model.js";
 import { Store } from "../models/store.model.js";
+import { sequelize } from "../config/database.js"; // Import sequelize để dùng transaction
 
 export const createOrder = async (req, res) => {
-  try {
-    const { userId, cartId, note, deliveryAddress, contactPhone, latitude, longitude } = req.body;
-    if (!userId) return res.status(400).json({ message: "Thiếu userId" });
+  // ✅ Bọc toàn bộ logic trong một transaction
+  const t = await sequelize.transaction();
 
-    // 1) Lấy cart
-    let cid = cartId;
-    if (!cid) {
-      const cart = await Cart.findOne({ where: { userId } });
-      if (!cart) return res.status(400).json({ message: "Không tìm thấy giỏ hàng" });
-      cid = cart.id;
+  try {
+    const { userId, note, deliveryAddress, contactPhone, latitude, longitude } = req.body;
+
+    const cart = await Cart.findOne({ where: { userId }, include: "cartitems" });
+    if (!cart || cart.cartitems.length === 0) {
+      await t.rollback();
+      return res.status(400).json({ message: "Giỏ hàng trống" });
+    }
+
+    // ✅ Kiểm tra và trừ kho
+    for (const item of cart.cartitems) {
+      const product = await Product.findByPk(item.productId, { transaction: t });
+      if (!product) {
+        await t.rollback();
+        return res.status(404).json({ message: `Sản phẩm ID ${item.productId} không tồn tại.` });
+      }
+      if (product.inventory < item.quantity) {
+        await t.rollback();
+        return res.status(400).json({ message: `Sản phẩm "${product.name}" không đủ hàng.` });
+      }
+      // Trừ kho
+      product.inventory -= item.quantity;
+      await product.save({ transaction: t });
     }
 
     // 2) Lấy items + Product
     const items = await CartItem.findAll({
-      where: { cartId: cid },
+      where: { cartId: cart.id },
       include: [{ model: Product, as: "product", attributes: ["id", "storeId", "price", "name"] }],
     });
 
@@ -47,7 +64,7 @@ export const createOrder = async (req, res) => {
       latitude,
       longitude,
       status: "pending",
-    });
+    }, { transaction: t });
 
     // 6) Tạo order items
     await Promise.all(items.map(i =>
@@ -56,17 +73,23 @@ export const createOrder = async (req, res) => {
         productId: i.productId,
         quantity: i.quantity,
         price: i.product.price,
-      })
+      }, { transaction: t })
     ));
 
     // 7) (Tuỳ chọn) Xoá giỏ sau khi tạo đơn
-    // await CartItem.destroy({ where: { cartId: cid } });
+    await CartItem.destroy({ where: { cartId: cart.id }, transaction: t });
+
+    // ✅ Commit transaction nếu mọi thứ thành công
+    await t.commit();
 
     console.log("✅ Created order", { orderId: order.id, storeId, totalPrice, items: items.length });
     return res.status(201).json({ orderId: order.id });
-  } catch (err) {
-    console.error("❌ createOrder error:", err);
-    return res.status(500).json({ message: "Lỗi server khi tạo đơn", detail: err.message });
+
+  } catch (error) {
+    // ✅ Rollback transaction nếu có lỗi
+    await t.rollback();
+    console.error("❌ Lỗi tạo đơn hàng:", error);
+    res.status(500).json({ message: "Lỗi server khi tạo đơn hàng" });
   }
 };
 

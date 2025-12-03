@@ -19,6 +19,7 @@ export const getProductById = async (req, res) => {
       description: product.description,
       imageUrl: product.imageUrl,
       storeId: product.storeId,
+      inventory: product.inventory, // ✅ Thêm
     });
   } catch (error) {
     console.error("🔥 Lỗi khi lấy chi tiết món:", error);
@@ -31,7 +32,7 @@ export const getProductById = async (req, res) => {
 export const getProducts = async (req, res) => {
   try {
     const products = await Product.findAll({
-      attributes: ["id", "name", "storeId","name", "price", "description", "imageUrl", "isAvailable",  ], // chỉ lấy tên và id
+      attributes: ["id", "name", "storeId","name", "price", "description", "imageUrl", "isAvailable", "inventory" ], // ✅ Thêm
       // bỏ include Store tạm thời để tránh lỗi
       // include: [{ model: Store, as: "store" }],
     });
@@ -48,7 +49,7 @@ export const getProducts = async (req, res) => {
 export const createProduct = async (req, res) => {
   try {
     const userId = req.query.userId;
-    const { storeId, name, price, description, imageUrl, isAvailable } = req.body;
+    const { storeId, name, price, description, imageUrl, isAvailable, inventory } = req.body; // ✅ Thêm
 
     if (!userId) return res.status(400).json({ message: "Thiếu userId" });
     if (!storeId) return res.status(400).json({ message: "Thiếu storeId" });
@@ -65,6 +66,7 @@ export const createProduct = async (req, res) => {
       description,
       imageUrl,
       isAvailable: isAvailable ?? true,
+      inventory: inventory || 0, // ✅ Thêm
     });
 
     res.status(201).json(product);
@@ -90,6 +92,10 @@ export const updateProduct = async (req, res) => {
 
     if (req.body.price != null && Number(req.body.price) < 0) {
       return res.status(400).json({ message: "Giá phải ≥ 0" });
+    }
+    // ✅ Thêm validation cho inventory
+    if (req.body.inventory != null && Number(req.body.inventory) < 0) {
+      return res.status(400).json({ message: "Tồn kho phải ≥ 0" });
     }
 
     await product.update(req.body);
@@ -184,7 +190,7 @@ export const getPublicProductsByStore = async (req, res) => {
 
     const products = await Product.findAll({
       where: { storeId, isAvailable: true },
-      attributes: ["id","storeId","name","price","description","imageUrl","isAvailable"]
+      attributes: ["id","storeId","name","price","description","imageUrl","isAvailable", "inventory"] // ✅ Thêm
     });
 
     return res.json(products);
