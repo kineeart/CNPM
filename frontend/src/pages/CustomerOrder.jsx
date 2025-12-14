@@ -59,39 +59,32 @@ const PopupMap = ({
   const [dronePos, setDronePos] = useState([storeLat, storeLon]);
   const [progress, setProgress] = useState(0); // ✅ 1. Thêm state cho progress
 
+  const distance = haversineDistance(storeLat, storeLon, userLat, userLon);
   const speed = Number(droneSpeed) > 0 ? Number(droneSpeed) : 30;
+  const estMinutes = (distance / speed) * 60;
+  const remainingDistance = distance * (1 - progress);
 
   useEffect(() => {
-    if (status !== "delivering") return;
-
+    // ❌ Đang chặn: if (status !== "delivering") return;
+    // ✅ Luôn poll khi popup mở để thấy drone bay, kể cả success
     let timer;
     const poll = async () => {
       try {
         const res = await axios.get(`${BACKEND_URL}/delivery/progress/${orderId}`);
-        const { status: s, progress: p, position } = res.data || {}; // ✅ 2. Lấy progress từ API
+        const { status: s, progress: p, position } = res.data || {};
         if (position?.lat != null && position?.lon != null) {
           setDronePos([position.lat, position.lon]);
         }
-        if (p != null) {
-          setProgress(p); // ✅ 3. Cập nhật state progress
-        }
-        if (p >= 1 || s === "done") {
-          clearInterval(timer);
-        }
+        if (typeof p === "number") setProgress(p);
+        if (p >= 1 || s === "done") clearInterval(timer);
       } catch (err) {
         console.error("Lỗi cập nhật tiến trình drone:", err);
       }
     };
-
     poll();
     timer = setInterval(poll, 1500);
     return () => clearInterval(timer);
-  }, [status, orderId]);
-
-  const distance = haversineDistance(storeLat, storeLon, userLat, userLon);
-  // ✅ Sửa lại: Thay 100 bằng biến `speed` và nhân với 60 để ra phút
-  const estMinutes = (distance / 1000000000) * 60;
-  const remainingDistance = distance * (1 - progress); // ✅ 4. Tính quãng đường còn lại
+  }, [orderId]); // ✅ bỏ phụ thuộc vào status
 
   return (
     <div className="popup-overlay">
@@ -120,9 +113,15 @@ const PopupMap = ({
           <Marker position={dronePos} icon={droneIcon}>
             <Popup>
               Drone đang bay 🚀
-              {/* ✅ Sửa điều kiện: Chỉ hiện khi progress trong khoảng 50-55% */}
+              {/* ✅ Thông báo mốc 1/3 quãng đường (~33% đến <36%) */}
+              {progress >= 0.33 && progress < 0.36 && (
+                <div style={{ marginTop: 5, color: '#0c7', fontWeight: 'bold' }}>
+                  Đã đi được 1/3 chặng đường! Còn {remainingDistance.toFixed(2)} km.
+                </div>
+              )}
+              {/* ✅ Thông báo mốc 1/2 quãng đường (~50% đến <55%) */}
               {progress >= 0.5 && progress < 0.55 && (
-                <div style={{ marginTop: '5px', color: 'green', fontWeight: 'bold' }}>
+                <div style={{ marginTop: 5, color: 'green', fontWeight: 'bold' }}>
                   Chỉ còn {remainingDistance.toFixed(2)} km nữa!
                 </div>
               )}
@@ -138,7 +137,7 @@ const PopupMap = ({
           />
         </MapContainer>
 
-        {/* ✅ Sửa lại phần hiển thị thông tin quãng đường */}
+        {/* ✅ Chỉ hiển thị thống kê khi đã qua 50% */}
         {progress >= 0.5 && (
           <div style={{ marginTop: 10 }}>
             <p>📏 Tổng quãng đường: {distance.toFixed(2)} km</p>

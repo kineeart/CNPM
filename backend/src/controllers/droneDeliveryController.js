@@ -51,6 +51,7 @@ export const create = async (req, res) => {
 // Cập nhật drone
 export const update = async (req, res) => {
   try {
+    // ✅ req.body chứa các trường cần cập nhật, ví dụ: { "speed": 150 }
     const [updatedRows] = await DroneDelivery.update(req.body, { where: { id: req.params.id } });
     if (updatedRows === 0) return res.status(404).json({ error: "Drone không tồn tại" });
     res.json({ message: "Cập nhật thành công" });
