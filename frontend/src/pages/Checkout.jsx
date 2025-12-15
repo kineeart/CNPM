@@ -151,6 +151,31 @@ const Checkout = () => {
   // ================= CHECKOUT =================
   const handleCheckout = async () => {
     if (!userId || cartItems.length === 0) return;
+    
+    // ✅ Kiểm tra đầy đủ địa chỉ
+    if (!selectedCity || !selectedDistrict || !selectedWard) {
+      const errorMsg = "❌ Vui lòng chọn đầy đủ Tỉnh/Thành, Quận/Huyện, Phường/Xã";
+      setMessage(errorMsg);
+      alert(errorMsg);
+      return;
+    }
+    
+    // ✅ Kiểm tra số điện thoại
+    if (!form.contactPhone || form.contactPhone.trim() === "") {
+      const errorMsg = "❌ Vui lòng nhập số điện thoại liên hệ";
+      setMessage(errorMsg);
+      alert(errorMsg);
+      return;
+    }
+    
+    // ✅ Kiểm tra tọa độ
+    if (!latitude || !longitude) {
+      const errorMsg = "❌ Vui lòng chọn vị trí giao hàng trên bản đồ";
+      setMessage(errorMsg);
+      alert(errorMsg);
+      return;
+    }
+    
     setLoading(true);
     setMessage("");
     const deliveryAddress = [
@@ -270,7 +295,7 @@ const Checkout = () => {
 
             <button
               onClick={handleCheckout}
-              disabled={loading || cartItems.length === 0}
+              disabled={loading || cartItems.length === 0 || !selectedCity || !selectedDistrict || !selectedWard || !form.contactPhone}
               className="checkout-btn-green"
             >
               {loading ? "Đang xử lý..." : "Thanh toán"}
