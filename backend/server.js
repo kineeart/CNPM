@@ -55,8 +55,20 @@ app.use("/api", droneDeliveryRoutes);
 app.get("/ping", (req, res) => res.json({ message: "🏓 Server sống!" }));
 app.get("/", (req, res) => res.send("🚀 Backend FastFood Drone Delivery đang chạy!"));
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server chạy tại http://0.0.0.0:${PORT}`);
-});
-
-startDeliveryCron();
+// Database connection and server startup
+(async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("✅ Database connected successfully!");
+    
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server chạy tại http://0.0.0.0:${PORT}`);
+      console.log(`📡 Backend URL: http://localhost:${PORT}`);
+    });
+    
+    startDeliveryCron();
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
+    process.exit(1);
+  }
+})();

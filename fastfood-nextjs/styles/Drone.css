@@ -1,0 +1,65 @@
+/* Drone Styles */
+.drone-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.drone-content {
+  flex: 1;
+  padding: 20px;
+}
+
+.drone-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.drone-table th,
+.drone-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.drone-table th {
+  background: #34495e;
+  color: white;
+}
+
+.status-badge-flying {
+  padding: 4px 8px;
+  background: #e74c3c;
+  color: white;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.status-badge-waiting {
+  padding: 4px 8px;
+  background: #2ecc71;
+  color: white;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.drone-form {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 5px;
+}
+
+.drone-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.map-container {
+  height: 350px;
+  width: 100%;
+  border-radius: 10px;
+}
